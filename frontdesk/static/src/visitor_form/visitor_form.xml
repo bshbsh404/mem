@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.VisitorForm">
+        <div class="d-flex flex-column justify-content-center">
+            <form class="row d-flex justify-content-center align-items-start" t-on-submit.prevent="_onSubmit">
+                <div t-att-class="props.isPlannedVisitors ? 'col-xl-9' : 'col-lg-6'">
+                    <div class="row">
+                        <div class="mt-3 col-12">
+                            <label class="form-label">Visitor Type <span class="small text-danger">*</span></label>
+                            <div class="form-check">
+                                <label class="form-check-label" for="visitorTypeIndividual">Individual</label>
+                                <input type="radio" id="visitorTypeIndividual" name="visitorType" value="individual" class="form-check-input" t-on-change="_onVisitorTypeChange" t-att-checked="state.visitorType === 'individual'"/>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="visitorTypeCompany">Organization (Corporate)</label>
+                                <input type="radio" id="visitorTypeCompany" name="visitorType" value="company" class="form-check-input" t-on-change="_onVisitorTypeChange" t-att-checked="state.visitorType === 'company'"/>
+                            </div>
+                            <div class="form-check">
+                                <label class="form-check-label" for="visitorTypeEmployee">Employee/Contractor</label>
+                                <input type="radio" id="visitorTypeEmployee" name="visitorType" value="employee" class="form-check-input" t-on-change="_onVisitorTypeChange" t-att-checked="state.visitorType === 'employee'"/>
+                            </div>
+                        </div>
+
+                        <div t-if="state.visitorType === 'employee'">
+                            <div class="mt-3">
+                                <label for="emp_id" class="form-label">Employee ID <span class="small text-danger">*</span></label>
+                                <input type="text" autocomplete="off" class="form-control" t-on-change="_onInputEmpIDChange" id="emp_id" t-ref="inputEmpID" placeholder="Employee ID"/>
+                            </div>
+                        </div>
+
+                        <div t-if="props.stationInfo.ask_first_name !== 'none'" class="mt-3 col-6">
+                            <label for="name" class="form-label">Your First Name <t t-if="props.stationInfo.ask_first_name != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="name" t-ref="inputName" placeholder="e.g. John Doe" t-att-required="props.stationInfo.ask_first_name === 'required'" t-att-value="props.visitorData.visitorName"/>
+                        </div>
+                        <div t-if="props.stationInfo.ask_second_name != 'none'" class="mt-3 col-6">
+                            <label for="second_name" class="form-label">Your Second Name <t t-if="props.stationInfo.ask_second_name != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="second_name" t-ref="inputSecondName" placeholder="e.g. Doe" t-att-required="props.stationInfo.ask_second_name === 'required'" t-att-value="props.visitorData.visitorSecondName"/>
+                        </div>
+                        <div t-if="props.stationInfo.ask_third_name != 'none'" class="mt-3 col-6">
+                            <label for="third_name" class="form-label">Your Third Name <t t-if="props.stationInfo.ask_third_name != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="third_name" t-ref="inputThirdName" placeholder="e.g. Doe" t-att-required="props.stationInfo.ask_third_name === 'required'" t-att-value="props.visitorData.visitorThirdName"/>
+                        </div>
+                        <div t-if="props.stationInfo.ask_fourth_name != 'none'" class="mt-3 col-6">
+                            <label for="fourth_name" class="form-label">Your Family Name <t t-if="props.stationInfo.ask_fourth_name != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="fourth_name" t-ref="inputFourthName" placeholder="e.g. Doe" t-att-required="props.stationInfo.ask_fourth_name === 'required'" t-att-value="props.visitorData.visitorFourthName"/>
+                        </div>
+                    </div>
+
+                    <t t-if="props.stationInfo.authenticate_guest">
+                        <div t-if="state.visitorType === 'company' or state.visitorType === 'individual'">
+                            <t t-if="props.stationInfo.authenticate_guest">
+                                <div t-if="props.stationInfo.ask_email !== 'none' and state.visitorType !== 'employee'" class="mt-3">
+                                    <label for="email" class="form-label">Your Email <t t-if="props.stationInfo.ask_email != 'optional'"><span class="small text-danger">*</span></t></label>
+                                    <input type="email" pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="email" t-ref="inputEmail" placeholder="e.g. john@organization.com" t-att-required="props.stationInfo.ask_email === 'required'" t-att-value="props.visitorData.visitorEmail"/>
+                                </div>
+                                <div t-if="props.stationInfo.ask_phone !== 'none'" class="mt-3">
+                                    <label for="phone" class="form-label">Your Phone Number <t t-if="props.stationInfo.ask_phone != 'optional'"><span class="small text-danger">*</span></t></label>
+                                    <input type="phone" minlength="8" maxlength="8" pattern=".{8,8}" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="phone" t-ref="inputPhone" t-att-required="props.stationInfo.ask_phone === 'required'" t-att-value="props.visitorData.visitorPhone"/>
+                                </div>
+                                <div t-if="props.stationInfo.ask_landline !== 'none'" class="mt-3">
+                                    <label for="landline" class="form-label">Your Landline Number <t t-if="props.stationInfo.ask_landline != 'optional'"><span class="small text-danger">*</span></t></label>
+                                    <input type="phone" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="landline" t-ref="inputLandline" t-att-required="props.stationInfo.ask_landline === 'required'" t-att-value="props.visitorData.visitorLanline"/>
+                                </div>
+                                <div t-if="state.visitorType === 'company'" class="mt-3">
+                                    <label for="company" class="form-label">Your Organization <t><span class="small text-danger">*</span></t></label>
+                                    <input type="text" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="company" t-ref="inputCompany" placeholder="e.g. My Organization" t-att-required="state.visitorType === 'company'" t-att-value="props.visitorData.visitorCompany"/>
+                                </div>
+                            </t>
+                        </div>
+
+                        
+
+                        <div class="mt-3 col-12">
+                            <label class="form-label">Identification Type <span class="small text-danger">*</span></label>
+                            <div t-if="props.stationInfo.ask_visitor_id !== 'none'" class="form-check">
+                                <input type="radio" id="selectVisitorID" name="idType" t-on-change="_onIDTypeChange" class="form-check-input" value="visitorID" t-att-checked="state.selectedIDType === 'visitorID'"/>
+                                <label class="form-check-label" for="selectVisitorID">Civil ID</label>
+                            </div>
+                            <div t-if="props.stationInfo.ask_passport !== 'none'" class="form-check">
+                                <input type="radio" id="selectPassport" name="idType" t-on-change="_onIDTypeChange" class="form-check-input" value="passport" t-att-checked="state.selectedIDType === 'passport'"/>
+                                <label class="form-check-label" for="selectPassport">Passport</label>
+                            </div>
+                        </div>
+
+                        <div t-if="props.stationInfo.ask_visitor_id !== 'none' and state.selectedIDType === 'visitorID'" class="mt-3 col-12">
+                            <label for="visitor_id" class="form-label">Civil ID <t t-if="props.stationInfo.ask_visitor_id != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" minlength="4" maxlength="9" pattern=".{4,9}" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="visitor_id" t-ref="inputVisitorID" placeholder="ID Card" t-att-required="props.stationInfo.ask_visitor_id === 'required'" t-att-value="props.visitorData.visitorID"/>
+                        </div>
+
+                        <div t-if="props.stationInfo.ask_passport !== 'none' and state.selectedIDType === 'passport'" class="mt-3">
+                            <label for="passport" class="form-label">Passport <t t-if="props.stationInfo.ask_passport != 'optional'"><span class="small text-danger">*</span></t></label>
+                            <input type="text" minlength="4" maxlength="9" pattern=".{4,9}" autocomplete="off" class="form-control" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="passport" t-ref="inputPassport" placeholder="Passport" t-att-required="props.stationInfo.ask_passport === 'required'" t-att-value="props.visitorData.passport"/>
+                        </div>
+                    </t>
+                    <div t-if="state.showPhoneError" class="text-danger mt-3">Please enter the phone number with the country code.</div>
+                    <t t-if="props.stationInfo.allow_recaptcha and props and props.currentLang and props.currentLang == 'ar_001'">
+                        <script src="https://www.google.com/recaptcha/api.js?hl=ar" async="async" defer="defer"></script>
+                    </t>
+                    <t t-elif="props.stationInfo.allow_recaptcha">
+                        <script src="https://www.google.com/recaptcha/api.js" async="async" defer="defer"></script>
+                    </t>
+
+                    <div t-if="props.stationInfo.allow_recaptcha" class="g-recaptcha" data-sitekey="6LfQy7QqAAAAAGzeeD5m3XVNAPT52R92NaX81-uX" style="margin-top: 15px;"></div>
+                    
+                    <button type="submit" class="btn btn-primary mt-4 w-100">Register</button>
+                </div>
+            </form>
+        </div>
+    </t>
+</templates>

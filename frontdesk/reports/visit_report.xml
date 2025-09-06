@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+
+        <report
+                id="report_visit"
+                model="frontdesk.visitor"
+                string="Visit"
+                name="frontdesk.report_visit_view"
+                file="frontdesk.report_visit_view"
+                report_type="qweb-pdf"/>
+
+        <record id="report_visit" model="ir.actions.report">
+            <field name="name">Visit</field>
+            <field name="model">frontdesk.visitor</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">frontdesk.report_visit_view</field>
+            <field name="report_file">frontdesk.report_visit_view</field>
+            <field name="print_report_name">'Visit - %s' % (object.partner_id.name)</field>
+            <field name="binding_model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="binding_type">report</field>
+        </record>
+
+        <template id="report_visit_view">
+            <t t-call="web.html_container">
+                <t t-call="web.basic_layout">
+                    <t t-foreach="docs" t-as="o">
+                        <div class="page">
+                            <div style="width: 100; text-align: center;">
+                                <img t-att-src="image_data_uri(request.env.company.logo)" style="max-height: 45px;" alt="Logo"/>
+                                <br/>
+                                <t t-if="o and o.exists() and o.qr_code">
+                                    <img t-att-src="image_data_uri(o.qr_code)" style="height:500px; width:500px; text-align: center;" alt="QR Code"/>
+                                </t>
+                                <table class="table table-condensed text-left" style="text-align: left;">
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>Visitor</strong></td>
+                                            <td><span t-esc="o.partner_id.name"/></td>
+                                        </tr>
+                                        <tr t-if="o.company_id">
+                                            <td><strong>Company</strong></td>
+                                            <td><span t-esc="o.company_id.name"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Hosting Employee</strong></td>
+                                            <td><span t-field="o.employee_id"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Hosting Employee Email</strong></td>
+                                            <td><span t-field="o.employee_id.work_email"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Hosting Employee Phone</strong></td>
+                                            <td><span t-field="o.employee_id.work_phone"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Visit Date</strong></td>
+                                            <td><span t-field="o.date"/></td>
+                                        </tr>
+                                        <tr t-if="o.building_id">
+                                            <td><strong>Building</strong></td>
+                                            <td><span t-field="o.building_id"/> - <span t-field="o.level_id"/> - <span t-field="o.section_id"/></td>
+                                        </tr>
+                                        <tr t-if="o.location_description">
+                                            <td><strong>Location</strong></td>
+                                            <td><span t-field="o.location_description"/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Planned Time</strong></td>
+                                            <td><span t-field="o.planned_time" t-options='{"widget": "time"}'/></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Planned Duration</strong></td>
+                                            <td><span t-field="o.planned_duration"/> Minutes</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </t>
+                </t>
+            </t>
+        </template>
+
+    </data>
+</odoo>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.GroupReservations">
+        <div class="d-flex flex-column justify-content-center">
+            <div style="height: 400px;">
+                <h4 class="mb-0 mb-2 text-center">Group Reservations</h4>
+                <div class="text-center" t-if="props.stationInfo.group_reservations_description">
+                    <t t-esc="props.stationInfo.group_reservations_description"/>
+                    <br/>
+                    <br/>
+                    <a class="btn btn-primary" target="_blank" t-attf-href="/frontdesk/group-reservations/{{props.stationInfo.id}}">Download</a>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

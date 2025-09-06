@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="frontdesk_request_custom_view" model="ir.ui.view">
+            <field name="name">frontdesk.request.tree</field>
+            <field name="model">frontdesk.request</field>
+            <field name="arch" type="xml">
+                <tree string="Requests">
+                    <header>
+                        <button name="send_email_to_host" type="object" string="Notify Host" icon="fa-envelope" groups="frontdesk.group_security_user"/>
+                        <button name="action_approve" type="object" string="Approve All" icon="fa-check" groups="frontdesk.group_security_user"/>
+                        <button name="action_reject" type="object" string="Reject All" icon="fa-close" groups="frontdesk.group_security_user"/>
+                    </header>
+                    <field name="name"/>
+                    <field name="full_name" decoration-danger="visitor_id and visitor_id.is_blacklisted_from_visit == True" decoration-info="(visitor_id and visitor_id.is_blacklisted_from_visit == False) or not visitor_id" optional="hide"/>
+                    <field name="phone" optional="show"/>
+                    <field name="landline" optional="hide"/>
+                    <field name="email" optional="show"/>
+                    <field name="date" optional="hide"/>
+                    <field name="visitor_id" optional="show"/>
+                    <field name="visitor_id_number" optional="hide"/>
+                    <field name="passport" optional="hide"/>
+                    <button name="action_create_visitor" type="object" string="Create Visitor" icon="fa-plus" invisible="visitor_id"/>
+                    <field name="company" optional="hide"/>
+                    <field name="company_id" optional="hide"/>
+                    <field name="department" optional="hide"/>
+                    <field name="department_id" optional="hide"/>
+
+                    <field name="building_id" optional="show"/>
+                    <field name="level_id" optional="show" domain="[('building_id', '=', building_id)]"/>
+                    <field name="section_id" optional="show" domain="[('level_id', '=', level_id)]"/>
+                    <field name="location_description" optional="show"/>
+
+                    <field name="is_recurring" optional="hide"/>
+                    <field name="planned_date" optional="show"/>
+                    <field name="planned_date_end" invisible="not is_recurring" optional="hide"/>
+                    <field name="planned_time" optional="show" widget="float_time"/>
+                    <field name="planned_duration" optional="show"/>
+                    <field name="visit_purpose" optional="hide"/>
+                    <field name="other_reason_id" optional="hide"/>
+                    <field name="employee_name" optional="hide"/>
+                    <field name="employee_phone" optional="hide"/>
+                    <field name="host_landline" optional="hide"/>
+                    <field name="employee_id" optional="show"/>
+                    <field name="employee_email" optional="hide"/>
+                    <field name="reject_reason_id" invisible="not state in ['rejected']" optional="hide"/>
+                    <field name="state" optional="hide"/>
+                    <field name="source" optional="hide"/>
+                    <button name="action_approve" type="object" string="Approve" icon="fa-check" invisible="True"/>
+                    <button name="action_reject" type="object" string="Reject" icon="fa-close" invisible="True"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- add form view all read only -->
+        <record id="frontdesk_request_form_custom_view" model="ir.ui.view">
+            <field name="name">frontdesk.request.form</field>
+            <field name="model">frontdesk.request</field>
+            <field name="arch" type="xml">
+                <form string="Request">
+                    <header>
+                        <button name="action_create_visitor" type="object" string="Create Visitor" icon="fa-plus" invisible="visitor_id"/>
+                        <button name="send_email_to_host" type="object" string="Notify Host" icon="fa-envelope" groups="frontdesk.group_security_user"/>
+                        <button name="action_approve" type="object" string="Approve" icon="fa-check" groups="frontdesk.group_security_user"/>
+                        <button name="action_reject" type="object" string="Reject" icon="fa-close" groups="frontdesk.group_security_user"/>
+                    <field name="state" widget="statusbar" readonly="1"/>
+                    </header>
+                    <sheet>
+                        <h1>
+                            <field name="full_name" readonly="1" class="o_label_large"/>
+                        </h1>
+                        <group>
+                            <group>
+                                <field name="planned_date" widget="date"/>
+                            </group>
+                            <group>
+                                <field name="date" widget="date"/>
+                                <field name="station_id"/>
+                                 <field name="operating_unit_id"
+                                    options="{'no_create': True}"
+                                />
+                                <field name="operating_unit_ids" invisible="1"/>
+                                <field name="operating_unit_change_reason"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Visitor Details">
+                                <group>
+                                    <group>
+                                        <field name="name"/>
+                                        <field name="second_name"/>
+                                        <field name="third_name"/>
+                                        <field name="fourth_name"/>
+                                    </group>
+                                    <group>
+                                        <field name="visitor_id"/>
+                                        <field name="visitor_id_number"/>
+                                        <field name="passport"/>
+                                        <field name="company"/>
+                                        <field name="preferred_language"/>
+                                    </group>
+                                    <group>
+                                        <field name="phone" widget="phone"/>
+                                        <field name="landline" widget="phone"/>
+                                        <field name="email" widget="email"/>
+                                    </group>
+                                    <group>
+                                        <field name="company_id"/>
+                                        <field name="department"/>
+                                        <field name="department_id"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Visit Details">
+                                <group>
+                                    <group>
+                                        <field name="is_recurring"/>
+                                        <field name="planned_date_end" invisible="not is_recurring" widget="date"/>
+                                    </group>
+                                    <group>
+                                        <field name="planned_time" widget="float_time"/>
+                                        <field name="planned_duration"/>
+                                    </group>
+                                    <group>
+                                        <field name="visit_purpose"/>
+                                        <field name="other_reason_id"/>
+                                        <field name="source"/>
+                                        <field name="is_online" readonly="1"/>
+                                        <field name="wilayat_id" invisible="not is_online"/>
+                                        <field name="visit_type" invisible="not is_online"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Location Details">
+                                <group>
+                                    <group>
+                                        <field name="building_id"/>
+                                        <field name="level_id" domain="[('building_id', '=', building_id)]"/>
+                                    </group>
+                                    <group>
+                                        <field name="section_id" domain="[('level_id', '=', level_id)]"/>
+                                        <field name="location_description"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Employee Details">
+                                <group>
+                                    <group>
+                                        <field name="employee_id"/>
+                                        <field name="employee_name"/>
+                                    </group>
+                                    <group>
+                                        <field name="employee_phone" widget="phone"/>
+                                        <field name="host_landline" widget="phone"/>
+                                    </group>
+                                    <group>
+                                        <field name="employee_email" widget="email"/>
+                                        <field name="emp_id"/>
+                                    </group>
+                                </group>
+                            </page>
+                            <page string="Other">
+                                <group>
+                                    <field name="response_time" readonly="1" widget="datetime"/>
+                                    <field name="reject_reason_id" invisible="state != 'rejected'"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_visit_request_reject_form" model="ir.ui.view">
+            <field name="name">visit.request.reject.form</field>
+            <field name="model">frontdesk.request</field>
+            <field name="arch" type="xml">
+                <form string="Reject Visit Request">
+                    <group>
+                        <field name="reject_reason_id" required="1"/>
+                    </group>
+                    <footer>
+                        <button string="Reject" type="object" name="confirm_reject" class="btn-primary"/>
+                        <button string="Cancel" class="btn-secondary" special="cancel"/>
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record id="frontdesk_request_search_view" model="ir.ui.view">
+           <field name="name">frontdesk_request_search_view</field>
+           <field name="model">frontdesk.request</field>
+            <field name="arch" type="xml">
+                <search string="">
+                    <field name="name"/>
+                    <filter string="New" name="new"
+                    domain="[('state', '=', 'draft')]"/>
+                    <filter string="Phone visits" name="phone_visits"
+                    domain="[('source', '=', 'phone')]"/>
+                    <filter string="In Person visits" name="in_person_visits"
+                        domain="[('source', '=', 'in_person')]"/>
+                    <filter string="Online visits" name="online_visits"
+                        domain="[('source', '=', 'online')]"/>
+                </search>
+           </field>
+        </record>
+
+        <record id="frontdesk_request_act_window" model="ir.actions.act_window">
+            <field name="name">Requests</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">frontdesk.request</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{
+            "search_default_new": 1
+        }</field>
+        </record>
+
+        <menuitem name="Requests" id="frontdesk_request_custom_menu" parent="frontdesk_menu_root" sequence="0" action="frontdesk_request_act_window"/>
+
+    </data>
+</odoo>

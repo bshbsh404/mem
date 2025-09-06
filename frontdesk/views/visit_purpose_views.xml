@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <record id="view_visit_purpose_tree" model="ir.ui.view">
+            <field name="name">visit.purpose.tree</field>
+            <field name="model">frontdesk.visit.purpose</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="name"/>
+                    <field name="department_ids"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_visit_purpose_form" model="ir.ui.view">
+            <field name="name">visit.purpose.form</field>
+            <field name="model">frontdesk.visit.purpose</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <field name="name"/>
+                        <field name="department_ids" widget="many2many_tags"/>
+                        <field name="is_other"/>
+                        <field name="other_reason_ids" invisible="not is_other"  widget="many2many_tags"/>
+
+                        <field name="state_ids" widget="many2many_tags"/>
+                    </group>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_visit_purpose" model="ir.actions.act_window">
+            <field name="name">Visit Purposes</field>
+            <field name="res_model">frontdesk.visit.purpose</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="frontdesk_menu_visit_purpose" name="Visit Purpose" parent="frontdesk_menu_root" action="action_visit_purpose"/>
+
+    </data>
+</odoo>

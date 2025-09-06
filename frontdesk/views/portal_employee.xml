@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- Add extra fields into portal my details -->
+  <template id="portal_my_details_fields_inherit" inherit_id="portal.portal_my_details_fields">
+    <xpath expr="//input[@name='company_name']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+
+    <xpath expr="//input[@name='name']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//input[@name='email']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//input[@name='vat']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//input[@name='street']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//input[@name='city']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//input[@name='zipcode']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//select[@name='country_id']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+    <xpath expr="//select[@name='state_id']" position="attributes">
+      <attribute name="readonly">1</attribute>
+    </xpath>
+
+    <xpath expr="." position="inside">
+      <t t-set="employee" t-value="request.env['hr.employee'].sudo().search([('user_id','=', request.env.user.id)], limit=1)"/>
+      <t t-if="employee">
+        <!-- preload options -->
+        <t t-set="buildings" t-value="request.env['owwsc.building'].sudo().search([])"/>
+        <t t-set="levels"    t-value="request.env['owwsc.level'].sudo().search([])"/>
+        <t t-set="sections"  t-value="request.env['owwsc.section'].sudo().search([])"/>
+        <div id="building-portal"></div>
+        <div class="row g-3 mt-3">
+          <!-- Building -->
+          <div class="col-12 col-md-6">
+            <label class="form-label">Building</label>
+            <select name="building_id" id="pel_building" class="form-select">
+              <option value="">—</option>
+              <t t-foreach="buildings" t-as="b">
+                <option t-att-value="b.id"
+                        t-att-selected="employee.building_id.id == b.id and 'selected' or None">
+                  <t t-esc="b.display_name"/>
+                </option>
+              </t>
+            </select>
+          </div>
+
+          <!-- Level (filtered by building) -->
+          <div class="col-12 col-md-6">
+            <label class="form-label">Level</label>
+            <select name="level_id" id="pel_level" class="form-select">
+              <option value="">—</option>
+              <t t-foreach="levels" t-as="lv">
+                <option t-att-value="lv.id"
+                        t-att-data-building-id="lv.building_id.id"
+                        t-att-selected="employee.level_id.id == lv.id and 'selected' or None">
+                  <t t-esc="lv.display_name"/>
+                </option>
+              </t>
+            </select>
+          </div>
+
+          <!-- Section (filtered by level) -->
+          <div class="col-12 col-md-6">
+            <label class="form-label">Section</label>
+            <select name="section_id" id="pel_section" class="form-select">
+              <option value="">—</option>
+              <t t-foreach="sections" t-as="sc">
+                <option t-att-value="sc.id"
+                        t-att-data-level-id="sc.level_id.id"
+                        t-att-selected="employee.section_id.id == sc.id and 'selected' or None">
+                  <t t-esc="sc.display_name"/>
+                </option>
+              </t>
+            </select>
+          </div>
+
+          <!-- Location Description -->
+          <div class="col-12 col-md-6 mb-4">
+            <label class="form-label">Location Description</label>
+            <input type="text" name="location_description" class="form-control"
+                   t-att-value="employee.location_description or ''"/>
+          </div>
+        </div>
+      </t>
+    </xpath>
+  </template>
+</odoo>

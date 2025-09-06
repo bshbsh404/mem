@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="frontdesk_frontdesk_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.form</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_open_kiosk" type="object" string="Open Kiosk" class="btn-primary" groups="frontdesk.frontdesk_group_user"/>
+                </header>
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="image" class="oe_avatar m-0" widget="image"/>
+                    <div class="oe_title">
+                        <label for="name"/>
+                        <h1><field name="name" placeholder="Frontdesk"/></h1>
+                    </div>
+                    <group class="gx-0">
+                        <group>
+                            <field name="responsible_ids" widget="many2many_avatar_user"/>
+                            <field name="company_id"  groups="base.group_multi_company"/>
+                            <field name="access_token" groups="base.group_no_one"/>
+                            <field name="kiosk_url" widget="CopyClipboardChar"/>
+                            <field name="building_id"/>
+                            <field name="email_host_domain"/>
+                            <field name="operating_unit_id"
+                                groups="operating_unit.group_multi_operating_unit"
+                                options="{'no_create': True}"
+                            />
+                            <field name="is_online"/>
+                            <field name="is_reception_desk"/>
+                            <field name="allow_recaptcha"/>
+                            <field name="fullscreen_password"/>
+                            <field name="security_employee_id"/>
+                        </group>
+                        <group>
+                            <label for="alias_name" string="Email Alias"/>
+                            <div name="alias_def">
+                                <field name="alias_id" string="Email Alias" class="oe_read_only" required="0"/>
+                                <div class="oe_edit_only" name="edit_alias">
+                                    <field name="alias_name" class="oe_inline"/>@
+                                    <field name="alias_domain_id" class="oe_inline" placeholder="e.g. domain.com" options="{'no_create': True, 'no_open': True}"/>
+                                </div>
+                            </div>
+                            <field name="accept_from"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Options" groups="frontdesk.frontdesk_group_user">
+                            <div class="row mt16 o_settings_container">
+                                <setting help="Allows the visitor to pick the host of the meeting from the list" invisible="1">
+                                    <field name="host_selection"/>
+                                </setting>
+                                <setting help="Show a QR code on the welcome screen to check-in from mobile">
+                                    <field name="self_check_in"/>
+                                </setting>
+                                <setting help="Request additional information upon registering">
+                                    <field name="authenticate_guest"/>
+                                    <group invisible="not authenticate_guest">
+                                        <field name="ask_email" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_phone" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_landline" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_company" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_first_name" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_second_name" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_third_name" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_fourth_name" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_visitor_id" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_passport" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_host_phone" widget="radio" options="{'horizontal': true}"/>
+                                        <field name="ask_host_landline" widget="radio" options="{'horizontal': true}"/>
+                                    </group>
+                                </setting>
+                                <setting help="Notify Visitors When Visit Request is Approved">
+                                    <field name="notify_email"/>
+                                    <group invisible="not notify_email">
+                                        <field name="mail_template_id"/>
+                                        <field name="host_mail_template_id"/>
+                                    </group>
+                                </setting>
+                                <setting help="Open host chat window when guest arrives" invisible="not host_selection">
+                                    <field name="notify_discuss"/>
+                                </setting>
+                                <setting help="Send an SMS to the host on guest arrival" invisible="not host_selection">
+                                    <field name="notify_sms"/>
+                                    <group invisible="not notify_sms">
+                                        <field name="sms_template_id"/>
+                                    </group>
+                                </setting>
+
+                                <setting help="Working Hours">
+                                    <group>
+                                        <field name="working_hours_start" widget="float_time"/>
+                                        <field name="working_hours_end" widget="float_time"/>
+                                    </group>
+                                </setting>
+                                
+                                <!-- Reminder Settings -->
+                                <setting help="Send an email/SMS to the visitor/Host as a reminder before the visit">
+                                    <field name="allow_reminder"/>
+                                    <group invisible="not allow_reminder">
+                                        <field name="reminder_notify_time"/>
+
+                                        <field name="reminder_notify_visitor"/>
+                                        <field name="reminder_notify_visitor_method" invisible="not reminder_notify_visitor"/>
+                                        <field name="reminder_mail_visitor_template_id" invisible="not reminder_notify_visitor or not reminder_notify_visitor_method in ['email', 'both']"/>
+                                        <field name="reminder_sms_visitor_template_id" invisible="not reminder_notify_visitor or not reminder_notify_visitor_method in ['sms', 'both']"/>
+
+                                        <field name="reminder_notify_host"/>
+                                        <field name="reminder_notify_host_method" invisible="not reminder_notify_host"/>
+                                        <field name="reminder_mail_host_template_id" invisible="not reminder_notify_host or not reminder_notify_host_method in ['email', 'both']"/>
+                                        <field name="reminder_sms_host_template_id" invisible="not reminder_notify_host or not reminder_notify_host_method in ['sms', 'both']"/>
+
+                                    </group>
+                                </setting>
+
+                                <!-- Late postpone notification -->
+                                <setting help="Send a postponement email/SMS to the visitor if the visit is delayed">
+                                    <field name="send_postpone_notification"/>
+                                    <group invisible="not send_postpone_notification">
+                                        <field name="postpone_time"/>
+                                        <field name="postpone_notify_method"/>
+                                        <field name="postpone_mail_template_id" invisible="not postpone_notify_method in ['email', 'both']"/>
+                                        <field name="postpone_sms_template_id" invisible="not postpone_notify_method in ['sms', 'both']"/>
+                                    </group>
+                                </setting>
+
+                                <!-- cancel due to extreme weather -->
+                                <setting help="Send a cancellation email/SMS to the visitor if the visit is cancelled due to extreme weather">
+                                    <field name="cancel_due_to_extreme_weather"/>
+                                    <group invisible="not cancel_due_to_extreme_weather">
+                                        <field name="cancellation_extreme_notify_method"/>
+                                        <field name="cancellation_extreme_weather_mail_template_id" invisible="not cancellation_extreme_notify_method in ['email', 'both']"/>
+                                        <field name="cancellation_extreme_weather_sms_template_id" invisible="not cancellation_extreme_notify_method in ['sms', 'both']"/>
+                                    </group>
+                                </setting>
+
+                                <setting help="Allow QR code SMS">
+                                    <field name="enable_qr_code_sms"/>
+                                    <group invisible="not enable_qr_code_sms">
+                                        <field name="qr_code_sms_template_id"/>
+                                    </group>
+                                </setting>
+
+                                <setting help="Visitor Check-out Reminder">
+                                    <field name="visitor_checkout_reminder_sms_template_id"/>
+                                </setting>
+
+                                <setting help="Allow Acknowledgment Notification">
+                                    <field name="enable_reservation_ack_mail"/>
+                                    <group invisible="not enable_reservation_ack_mail">
+                                        <field name="reservation_ack_mail_template_id"/>
+                                        <field name="enable_reservation_security_mail"/>
+                                    </group>
+                                </setting>
+
+                                <setting help="Allow visitors to extend their visit">
+                                    <field name="allow_extend_visit"/>
+                                </setting>
+
+                                <setting help="Allow visitors to cancel their visit">
+                                    <field name="allow_cancel_visit"/>
+                                </setting>
+
+                                <setting help="Allow visitors to check out">
+                                    <field name="allow_check_out"/>
+                                </setting>
+
+                                <setting help="Time period after which a visitor is considered absent">
+                                    <field name="absence_period"/>
+                                </setting>
+
+                                <setting help="Send a report of the response time to the management">
+                                    <field name="send_response_time_report"/>
+                                    <group invisible="not send_response_time_report">
+                                        <field name="response_time_limit"/>
+                                        <field name="response_time_report_recipients" widget="many2many_avatar_user"/>
+                                    </group>
+                                </setting>
+
+                                <setting help="Allow Group Reservations">
+                                    <field name="group_reservations"/>
+                                    <group invisible="not group_reservations">
+                                        <field name="group_reservations_attachment_id"/>
+                                        <field name="group_reservations_description"/>
+                                    </group>
+                                </setting>
+                                
+                                <setting help="Select the color of the Desk">
+                                    <field name="theme" widget="radio" options="{'horizontal': true}"/>
+                                    <field name="color" invisible="1"/>
+                                </setting>
+                                <setting help="Select the background image of the register page">
+                                    <field name="register_image" widget="image"/>
+                                </setting>
+                            </div>
+                        </page>
+                        <page string="Allowed Emails" invisible="accept_from == 'all'">
+                            <field name="email_ids">
+                                <tree editable="bottom">
+                                    <field name="name"/>
+                                    <field name="state"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Side Message" groups="frontdesk.frontdesk_group_user">
+                            <field name="description" placeholder="Write message..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="frontdesk_frontdesk_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.tree</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="responsible_ids" widget="many2many_avatar_user"/>
+                <field name="notify_email" optional="show"/>
+                <field name="notify_sms" optional="show"/>
+                <field name="notify_discuss" optional="show"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="frontdesk_frontdesk_view_kanban" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.kanban</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_dashboard" action="%(action_open_station_visitor)d" type="action">
+                <field name="guest_on_site"/>
+                <field name="pending"/>
+                <templates>
+                    <t t-name="kanban-menu">
+                        <a role="menuitem" class="dropdown-item" name="action_open_kiosk"
+                            type="object">Kiosk</a>
+                        <a role="menuitem" class="dropdown-item" name="action_open_requests"
+                            type="object">Requests</a>
+                        <a role="menuitem" class="dropdown-item" name="action_open_visitors"
+                            type="object">Visitors</a>
+                        <a role="menuitem" class="dropdown-item" name="%(action_frontdesk_station_report)d"
+                            type="action">Statistics</a>
+                        <a role="menuitem" type="edit" class="dropdown-item" groups="frontdesk.frontdesk_group_administrator">Configuration</a>
+                        <ul class="oe_kanban_colorpicker" data-field="color"/>
+                    </t>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click o_has_icon oe_kanban_content oe_kanban_card">
+                            <div class="o_kanban_card_content ps-3">
+                                <div class="o_kanban_card_header">
+                                    <div class="o_kanban_card_header_title mb16">
+                                        <div class="o_primary">
+                                            <field name="name"/>
+                                        </div>
+                                        <field name="is_favorite" widget="boolean_favorite" nolabel="1"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-12 mb-2">
+                                        Is Online: <field name="is_online" class="badge badge-pill badge-info"/>
+                                        <br />
+                                        Is Reception Desk: <field name="is_reception_desk" class="badge badge-pill badge-info"/>
+                                        <br />
+                                        Building: <field name="building_id"/>
+                                        <br />
+                                        Operating Unit: <field name="operating_unit_id"/>
+                                    </div>
+                                    <div class="col-6">
+                                        <button class="btn btn-primary" name="action_open_kiosk" type="object"
+                                        groups="frontdesk.frontdesk_group_user">Open Desk</button>
+                                    </div>
+                                    <div class="col-6">
+                                        <div t-if="record.request_count.raw_value > 0">
+                                            <a name="%(action_open_new_requests)d" type="action"
+                                            class="oe_kanban_stock_picking_type_list">
+                                            <field name="request_count"/> Requests</a>
+                                            <field name="color" invisible="1"/>
+                                        </div>
+                                        <div t-if="record.guest_on_site.raw_value > 0">
+                                            <a name="%(action_open_guest_on_site_visitor)d" type="action"
+                                            class="oe_kanban_stock_picking_type_list">
+                                            <field name="guest_on_site"/> On Site</a>
+                                        </div>
+                                        <div t-if="record.pending.raw_value > 0">
+                                            <a name="%(action_open_planned_visitor)d" type="action"
+                                            class="oe_kanban_stock_picking_type_list">
+                                            <field name="pending"/> Planned</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="oe_kanban_footer ps-3">
+                                <div class="o_kanban_record_bottom mt-3">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="latest_check_in"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="responsible_ids" widget="many2many_avatar_user"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="frontdesk_frontdesk_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.frontdesk.view.search</field>
+        <field name="model">frontdesk.frontdesk</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Desk Name"/>
+                <field name="responsible_ids" string="Responsible"/>
+                <filter string="My Desk" name="my_station" domain="[('responsible_ids', '=', uid)]"/>
+                <filter string="Favorite" name="is_favorite" domain="[('is_favorite', '=', True)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="By Responsible" name="group_by_responsible" context="{'group_by': 'responsible_ids'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_frontdesk_frontdesk" model="ir.actions.act_window">
+        <field name="name">Desks</field>
+        <field name="res_model">frontdesk.frontdesk</field>
+        <field name="view_mode">kanban,form,tree</field>
+    </record>
+
+    <record id="action_frontdesk_frontdesk_tree" model="ir.actions.act_window">
+        <field name="name">Desks</field>
+        <field name="res_model">frontdesk.frontdesk</field>
+        <field name="view_mode">tree,kanban,form</field>
+    </record>
+</odoo>

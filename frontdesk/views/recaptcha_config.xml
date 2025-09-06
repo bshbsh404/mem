@@ -1,0 +1,27 @@
+<odoo>
+    <record id="view_res_config_recaptcha_settings" model="ir.ui.view">
+        <field name="name">res.config.recaptcha.settings.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="reCAPTCHA" string="reCAPTCHA" name="recaptcha">
+                    <block title="reCAPTCHA" name="recaptcha_setting_container">
+                        <setting id="recaptcha_control_setting" title="reCAPTCHA" string="reCAPTCHA">
+                            <div class="content-group" name="recaptcha_options">
+                                <div class="d-flex">
+                                    <label for="frontdesk_recaptcha_site_key" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="frontdesk_recaptcha_site_key" class="ml16"/>
+                                </div>
+                                <div class="d-flex">
+                                    <label for="frontdesk_recaptcha_secret_key" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="frontdesk_recaptcha_secret_key" class="ml16" password="True"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

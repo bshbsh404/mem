@@ -1,0 +1,36 @@
+<odoo>
+    <record id="view_res_config_settings_azure_sync" model="ir.ui.view">
+        <field name="name">res.config.settings.azure.sync.form</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//form" position="inside">
+                <app data-string="Azure Sync" string="Azure Sync" name="frontdesk_auth_ldap">
+                    <block title="Azure Sync" name="frontdesk_auth_ldap">
+                        <setting id="frontdesk_auth_ldap" title="Azure Sync" string="Azure Sync">
+                            <div class="content-group" name="azure_sync_options">
+                                <div class="d-flex">
+                                    <label for="azure_ad_tenant_id" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="azure_ad_tenant_id" class="ml16"/>
+                                </div>
+                                <div class="d-flex">
+                                    <label for="azure_ad_client_id" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="azure_ad_client_id" class="ml16"/>
+                                </div>
+                                <div class="d-flex">
+                                    <label for="azure_ad_client_secret" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="azure_ad_client_secret" class="ml16"/>
+                                </div>
+
+                                <div class="d-flex">
+                                    <label for="azure_user_id" class="o_light_label col-sm-5 col-form-label"/>
+                                    <field name="azure_user_id" class="ml16" force_save="1"/>
+                                </div>
+                            </div>
+                        </setting>
+                    </block>
+                </app>
+            </xpath>
+        </field>
+    </record>
+</odoo>

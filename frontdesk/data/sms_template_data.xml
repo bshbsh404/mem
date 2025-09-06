@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<odoo>
+    <data noupdate="1">
+        <record id="frontdesk_sms_template" model="sms.template">
+            <field name="name">Frontdesk SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, Your visitor {{ object.display_name }} {{ '(%s)' % object.phone if object.phone else '' }} {{ '(%s)' % object.company_id if object.company_id else '' }} wants to meet you at {{ object.station_id.name }}, Purpose: {{ object.visit_purpose }}. Please let them know you'll be there shortly.</field>
+        </record>
+
+        <record id="qr_code_sms_template" model="sms.template">
+            <field name="name">Frontdesk QR code SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello {{ object.partner_id.name }}, your appointment is booked for {{ object.planned_date }} {{ object.get_planned_time_str() }}, Purpose: {{ object.visit_purpose }}. QR code link: {{ object.get_base_url() }}/public/qr/{{ object.id }}</field>
+        </record>
+
+        <record id="frontdesk_sms_host_reminder_template" model="sms.template">
+            <field name="name">Frontdesk Reminder Host SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, You have an appointment with {{ object.display_name }} at {{ object.station_id.name }}, Purpose: {{ object.visit_purpose }}. Please be there on time.</field>
+        </record>
+
+        <record id="frontdesk_sms_visitor_checkout_reminder_template" model="sms.template">
+            <field name="name">Frontdesk Visitor checkout Reminder SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, Your visit has ended. Please checkout.</field>
+        </record>
+
+        <record id="frontdesk_sms_visitor_reminder_template" model="sms.template">
+            <field name="name">Frontdesk Reminder Visitor SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, You have an appointment at {{ object.station_id.name }}, Purpose: {{ object.visit_purpose }}. Please be there on time.</field>
+        </record>
+
+        <record id="frontdesk_postpone_sms_template" model="sms.template">
+            <field name="name">Frontdesk Postponement SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, Based on your delay, the visit has been cancelled, Purpose: {{ object.visit_purpose }}.</field>
+        </record>
+
+        <!-- frontdesk_cancellation_extreme_weather_sms_template -->
+        <record id="frontdesk_cancellation_extreme_weather_sms_template" model="sms.template">
+            <field name="name">Frontdesk Cancellation Extreme Weather SMS Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="body">Hello, Due to extreme weather conditions, the visit has been cancelled.</field>
+        </record>
+    </data>
+</odoo>

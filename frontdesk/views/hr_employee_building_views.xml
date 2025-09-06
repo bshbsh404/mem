@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record id="res_employee_visitor_building_form_inherit" model="ir.ui.view">
+            <field name="name">hr.employee.building.visitor.form</field>
+            <field name="model">hr.employee</field>
+            <field name="inherit_id" ref="hr.view_employee_form"/>
+            <field name="mode">primary</field>
+            <field name="arch" type="xml">
+                <xpath expr="//page[1]" position="after">
+                    <page name="Building Details" string="Building Details">
+                        <group>
+                            <field name="building_id"/>
+                            <field name="level_id" domain="[('building_id', '=', building_id)]"/>
+                            <field name="section_id" domain="[('level_id', '=', level_id)]"/>
+                            <field name="location_description"/>
+                        </group>
+                    </page>
+                </xpath>
+            </field>
+        </record>
+</odoo>

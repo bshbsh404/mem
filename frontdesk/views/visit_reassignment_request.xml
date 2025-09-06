@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_visit_reassignment_request_tree" model="ir.ui.view">
+            <field name="name">visit.reassignment.request.tree</field>
+            <field name="model">visit.reassignment.request</field>
+            <field name="arch" type="xml">
+                <tree string="Reassignment Requests" create="false">
+                    <field name="name"/>
+                    <field name="type"/>
+                    <!-- <field name="current_employee_id"/> -->
+                    <field name="new_employee_id"/>
+                    <field name="state"/>
+                    <field name="reason"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_visit_reassignment_request_form" model="ir.ui.view">
+            <field name="name">visit.reassignment.request.form</field>
+            <field name="model">visit.reassignment.request</field>
+            <field name="arch" type="xml">
+                <form string="Reassignment Request">
+                    <sheet>
+                        <div class="oe_button_box" name="button_box" invisible="not id">
+                            <button class="oe_stat_button" type="object" name="action_approve" icon="fa-check" invisible="state != 'pending'" groups="frontdesk.group_visit_reassignment_manager">
+                                Approve
+                            </button>
+                            <button class="oe_stat_button" type="object" name="action_reject" icon="fa-close" invisible="state != 'pending'" groups="frontdesk.group_visit_reassignment_manager">
+                                Reject
+                            </button>
+                        </div>
+                        <div class="oe_title">
+                            <label for="name"/>
+                            <h1><field name="name"/></h1>
+                        </div>
+                        <notebook>
+                            <page string="availability" name="availability_page">
+                                <group name="info">
+                                    <group name="availability">
+                                        <field name="type"/>
+                                        <field name="request_id" invisible="type == 'approved_visit'"/>
+                                        <field name="visit_id" invisible="type == 'request'"/>
+                                        <!-- <field name="current_employee_id" readonly="1"/> -->
+                                        <field name="new_employee_id"/>
+                                        <field name="state" readonly="1"/>
+                                        <field name="reason"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_visit_reassignment_request" model="ir.actions.act_window">
+            <field name="name">Visit Reassignment Requests</field>
+            <field name="res_model">visit.reassignment.request</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <menuitem id="menu_visit_reassignment_request" name="Visit Reassignment Requests" parent="frontdesk_menu_root" action="action_visit_reassignment_request" sequence="20" groups="frontdesk.group_visit_reassignment_manager"/>
+
+
+    </data>
+</odoo>

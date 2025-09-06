@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.CheckOut">
+        <div class="d-flex flex-column justify-content-center">
+            <div style="height: 400px;">
+                <h4 class="mb-0 mb-2 text-center">Scan your QR code to Check-Out!</h4>                
+                <div id="reader" style="width: 50%; margin: 0 auto;"/>
+            </div>
+        </div>
+
+         <!-- Modal for Evaluation and NFC Card Display -->
+        <div class="modal fade" t-att-id="'evaluationModal'" tabindex="-1" role="dialog" aria-labelledby="evaluationModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="evaluationModalLabel">Evaluate Your Visit</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Thank you <strong><t t-esc="state.visitorName"/></strong> for visiting us! Please evaluate your visit by selecting one of the following emojis:</p>
+                        <div class="d-flex justify-content-center gap-4">
+                            <button class="btn btn-sm bg-white text-center" t-on-click="_onSelectEmoji.bind(this, 'very_sad')" aria-hidden="true" style="padding: 2px;font-style: normal;text-align: center;font-size: 50px;">😡</button>
+                            <button class="btn btn-sm bg-white text-center" t-on-click="_onSelectEmoji.bind(this, 'sad')" aria-hidden="true" style="padding: 2px;font-style: normal;text-align: center;font-size: 50px;">🙁</button>
+                            <button class="btn btn-sm bg-white text-center" t-on-click="_onSelectEmoji.bind(this, 'neutral')" aria-hidden="true" style="padding: 2px;font-style: normal;text-align: center;font-size: 50px;">😐</button>
+                            <button class="btn btn-sm bg-white text-center" t-on-click="_onSelectEmoji.bind(this, 'happy')" aria-hidden="true" style="padding: 2px;font-style: normal;text-align: center;font-size: 50px;">🙂</button>
+                            <button class="btn btn-sm bg-white text-center" t-on-click="_onSelectEmoji.bind(this, 'very_happy')" aria-hidden="true" style="padding: 2px;font-style: normal;text-align: center;font-size: 50px;">😃</button>
+                        </div>
+                        <p><strong>NFC Card Number:</strong> <t t-esc="state.nfcCardNumber"/></p>
+                        <!-- Comment Textarea -->
+                        <div class="mb-3">
+                            <label for="evaluationComment">Comment</label>
+                            <textarea id="evaluationComment"
+                                    t-model="state.comment"
+                                    class="form-control"
+                                    rows="3"
+                                    placeholder="Enter additional feedback here..."/>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <!-- Single button to submit both comment & emoji -->
+                        <button class="btn btn-primary"
+                                t-on-click="_onSubmitEvaluation">
+                            Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

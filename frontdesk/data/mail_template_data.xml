@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="frontdesk_mail_template" model="mail.template">
+            <field name="name">Frontdesk Email Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="subject">Visit Approved</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to visitor</field>
+            <field name="report_template_ids" eval="[(4, ref('frontdesk.report_visit'))]"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.partner_id.name"/>,<br/>
+                        Your visit has been approved. Please show attached QR code at the reception.
+                        <t t-if="object.visit_purpose">
+                            <p>For the purpose: <t t-esc="object.visit_purpose" /></p>
+                        </t>
+                        <t t-if="object.planned_date">
+                            <p>Date: <t t-esc="object.planned_date" /></p>
+                        </t>
+                        <t t-if="object.planned_time">
+                            <p>Time: <t t-esc="object.get_planned_time_str()" /></p>
+                        </t>
+                        <t t-if="object.planned_duration">
+                            <p>Duration: <t t-esc="object.planned_duration" /> Minute(s)</p>
+                        </t>
+                        
+
+                        <br/>
+                        Regards
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="frontdesk_host_approve_mail_template" model="mail.template">
+            <field name="name">Frontdesk Host Email Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_request"/>
+            <field name="subject">Visit Request</field>
+            <field name="email_to">{{ object.employee_id.work_email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to Host</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>
+                        Hello <t t-out="object.employee_id.name"/>,<br/>
+                        You have a visitor scheduled soon by <t t-out="object.name"/> <t t-out="object.second_name"/>.
+                    </p>
+
+                    <t t-if="object.visit_purpose">
+                        <p>For the purpose: <t t-esc="object.visit_purpose" /></p>
+                    </t>
+
+                    <p>
+                        <t t-if="object.planned_date">
+                            Date: <t t-esc="object.planned_date" />
+                        </t>
+                        <t t-if="object.planned_time">
+                            - Time: <t t-esc="object.get_planned_time_str()" />
+                        </t>
+                    </p>
+
+                    <p>
+                        <a t-attf-href="#{object.get_visitor_approve_url()}" class="btn btn-primary">approve</a>
+                        <a t-attf-href="#{object.get_visitor_reject_url()}" class="btn btn-danger">reject</a>
+                        <a t-attf-href="#{object.get_visitor_finish_url()}" class="btn btn-info">finish visit</a>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="frontdesk_mail_visitor_reminder_template" model="mail.template">
+            <field name="name">Frontdesk Visitor Email Reminder Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="subject">Visit Reminder</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to visitor</field>
+            <field name="report_template_ids" eval="[(4, ref('frontdesk.report_visit'))]"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.partner_id.name"/>,<br/>
+                        Your visit is scheduled at <t t-esc="object.station_id.name" />. Please be there on time.
+                        <t t-if="object.visit_purpose">
+                            <p>For the purpose: <t t-esc="object.visit_purpose" /></p>
+                        </t>
+                        <t t-if="object.planned_date">
+                            <p>Date: <t t-esc="object.planned_date" /></p>
+                        </t>
+                        <t t-if="object.planned_time">
+                            <p>Time: <t t-esc="object.get_planned_time_str()" /></p>
+                        </t>
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="frontdesk_mail_host_reminder_template" model="mail.template">
+            <field name="name">Frontdesk Host Email Reminder Template</field>
+            <field name="model_id" ref="hr.model_hr_employee"/>
+            <field name="subject">Visit Reminder</field>
+            <field name="email_to">{{ object.work_email }}</field>
+            <field name="description">Sent to host</field>
+            <field name="report_template_ids" eval="[(4, ref('frontdesk.report_visit'))]"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.name"/>,<br/>
+                        This is a reminder that you have a visitor scheduled soon. Please be there on time.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="reservation_ack_mail_template" model="mail.template">
+            <field name="name">Reservation Acknowledgment Email</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="subject">Reservation Acknowledgment</field>
+            <field name="email_from">{{ object.partner_id.email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to visitor</field>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.partner_id.name"/>,</p><br/>
+                    <p>Your reservation has been acknowledged. Here are the details:</p>
+                    <t t-if="object.visit_purpose">
+                        <p>Purpose: <t t-esc="object.visit_purpose" /></p>
+                    </t>
+                    <t t-if="object.planned_date">
+                        <p>Date: <t t-esc="object.planned_date" /></p>
+                    </t>
+                    <t t-if="object.planned_time">
+                        <p>Time: <t t-esc="object.get_planned_time_str()" /></p>
+                    </t>
+                    <p>Best Regards</p>
+                </div>
+            </field>
+        </record>
+
+        <record id="frontdesk_postpone_mail_template" model="mail.template">
+            <field name="name">Frontdesk Visitor Postponement Email Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="subject">Visi Postponed</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to visitor</field>
+            <field name="report_template_ids" eval="[(4, ref('frontdesk.report_visit'))]"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.partner_id.name"/>,<br/>
+                        Based on your delay, the visit has been cancelled.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <!-- frontdesk_cancellation_extreme_weather_mail_template -->
+        <record id="frontdesk_cancellation_extreme_weather_mail_template" model="mail.template">
+            <field name="name">Frontdesk Cancellation Extreme Weather Email Template</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
+            <field name="subject">Visit Cancelled</field>
+            <field name="email_to">{{ object.partner_id.email }}</field>
+            <field name="lang">{{ object.preferred_language }}</field>
+            <field name="description">Sent to visitor</field>
+            <field name="report_template_ids" eval="[(4, ref('frontdesk.report_visit'))]"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello <t t-out="object.partner_id.name"/>,<br/>
+                        Due to extreme weather conditions, the visit has been cancelled.
+                    </p>
+                </div>
+            </field>
+        </record>
+
+        <record id="email_template_late_response_report" model="mail.template">
+            <field name="name">Late Response Report</field>
+            <field name="subject">Late Response Report - ${object.name}</field>
+            <field name="email_to">{{ object._get_response_time_report_recipients_emails() }}</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_frontdesk"/>
+            <field name="body_html" type="html">
+                <div>
+                    <p>Hello,</p>
+                    <p>Here is the list of late response transactions for this week:</p>
+                    <ul>
+                        <t t-foreach="ctx.late_transactions" t-as="transaction">
+                            <li><strong>Request ID:</strong> <t t-esc="transaction.id"/> - <strong>Submitted On:</strong> <t t-esc="transaction.create_date"/></li>
+                        </t>
+                    </ul>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>

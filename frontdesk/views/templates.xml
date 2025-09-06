@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="frontdesk.thank_you_page" name="Thank You Page">
+        <t t-call="website.layout">
+            <t t-set="title">Thank You</t>
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-12">
+                        <h1><t t-esc="message"/></h1>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="frontdesk.reject_visitor_form" name="Reject Visitor Form">
+        <t t-call="website.layout">
+            <div class="container mt-5">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="text-center">Reject Visit</h2>
+                    </div>
+                    <div class="card-body">
+                        <form t-attf-action="/frontdesk/reject_visitor/#{visitor.id}" method="POST">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            
+                            <div class="row my-4">
+                                <div class="form-group col-12 col-md-6" t-if="visitor.id">
+                                    <label for="visitor_id">Visitor ID:</label>
+                                    #<t t-esc="visitor.id"/>
+                                </div>
+                                <div class="form-group col-12 col-md-6" t-if="visitor.full_name">
+                                    <label for="visitor_name">Visitor Name:</label>
+                                    <t t-esc="visitor.full_name"/>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="reason_id">Rejection Reason:</label>
+                                <select id="reason_id" name="reason_id" class="form-control">
+                                    <t t-foreach="reasons" t-as="reason">
+                                        <option t-att-value="reason.id">
+                                            <t t-esc="reason.name" />
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+
+                            <div class="text-center mt-4">
+                                <button type="submit" class="btn btn-danger">Reject</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

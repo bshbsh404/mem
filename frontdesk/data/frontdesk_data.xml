@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <record id="seq_frontend_visit" model="ir.sequence">
+            <field name="name">Desk: Visit</field>
+            <field name="code">frontdesk.visitor</field>
+            <field eval="1" name="number_next"/>
+            <field eval="1" name="number_increment"/>
+            <field name="padding">10</field>
+        </record>
+    </data>
+
+    <record id="ir_rule_frontdesk_frontdesk_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_frontdesk_frontdesk" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Frontdesk from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_frontdesk_visitor_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_frontdesk_visitor" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Visitor from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_frontdesk_request_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_frontdesk_request" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Request from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <!-- <record id="ir_rule_hr_department_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="hr.model_hr_department" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">HR Department from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record> -->
+
+    <record id="ir_rule_owwsc_building_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_building" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Building from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_owwsc_level_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_level" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Level from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_owwsc_section_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_section" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Section from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_owwsc_department_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_department" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Department from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_owwsc_office_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_office" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Office from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+    <record id="ir_rule_owwsc_meeting_hall_allowed_operating_units" model="ir.rule">
+        <field name="model_id" ref="frontdesk.model_owwsc_meeting_hall" />
+        <field name="domain_force">
+            ['|',('operating_unit_id','=',False),('operating_unit_id','in',operating_unit_ids)]
+        </field>
+        <field name="name">Meeting Hall from allowed operating units</field>
+        <field name="global" eval="True" />
+        <field eval="0" name="perm_unlink" />
+        <field eval="0" name="perm_write" />
+        <field eval="1" name="perm_read" />
+        <field eval="0" name="perm_create" />
+    </record>
+
+</odoo>

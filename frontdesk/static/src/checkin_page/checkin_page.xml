@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.CheckIn">
+        <div class="d-flex flex-column justify-content-center">
+            <div style="height: 400px;">
+                <h4 class="mb-0 mb-2 text-center">Scan your QR code to Check-In!</h4>
+                <div id="reader" style="width: 50%; margin: 0 auto;"/>
+            </div>
+        </div>
+    </t>
+</templates>

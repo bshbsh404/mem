@@ -1,0 +1,19 @@
+a[href="/my/security"] {
+  display: none !important;
+}
+.row.o_portal_details label[for="country_id"] {
+  display: none !important;
+}
+.row.o_portal_details .form-select[name="country_id"] {
+  display: none !important;
+}
+
+.row.o_portal_details label[for="state_id"] {
+  display: none !important;
+}
+.row.o_portal_details .form-select[name="state_id"] {
+  display: none !important;
+}
+.o_brand_promotion {
+  display: none !important;
+}

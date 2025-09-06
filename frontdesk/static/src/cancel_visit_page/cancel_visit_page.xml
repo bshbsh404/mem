@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.CancelVisit">
+        <div class="d-flex flex-column justify-content-center">
+            <div style="height: 400px;">
+                <h4 class="mb-0 mb-2 text-center">Scan your QR code to cancel your visit!</h4>
+                <div id="reader" style="width: 50%; margin: 0 auto;"/>
+            </div>
+        </div>
+
+        <!-- Modal -->
+        <div class="modal fade" t-att-id="'cancelModal'" tabindex="-1" role="dialog" aria-labelledby="cancelModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cancelModalLabel">Cancel Your Visit</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p>Please provide a reason for cancelling your visit:</p>
+                        <div class="d-flex justify-content-center gap-4">
+                            <textarea class="form-control" t-att-placeholder="'Reason for cancellation'" id="cancel_reason" style="width: 100%;"></textarea>
+                        </div>
+                        <div class="d-flex justify-content-center gap-4">
+                            <button class="btn btn-sm bg-white text-center btn-primary my-2 p-1" t-on-click="_onSubmitCancellation.bind(this)" aria-hidden="true">
+                            Confirm Cancellation
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

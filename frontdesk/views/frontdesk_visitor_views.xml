@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="frontdesk_visitor_view_tree" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.tree</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <tree
+                decoration-danger="state=='planned' and date&lt;datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')"
+                decoration-muted="state=='checked_out'">
+                <header>
+                    <button name="action_approve_extension" type="object" string="Approve extension" icon="fa-check" groups="frontdesk.group_security_user"/>
+                    <button name="action_reject_extension" type="object" string="Reject extension" icon="fa-close" groups="frontdesk.group_security_user"/>
+                </header>
+                <field name="served" column_invisible="True"/>
+                <field name="partner_id"/>
+                <field name="same_building"/>
+                <field name="building_id"/>
+                <field name="station_id"/>
+                <field name="company_id" optional="show"/>
+                <field name="phone" optional="show"/>
+                <field name="department_id" string="Department" optional="show"/>
+                <field name="employee_id" string="Employee" optional="show"/>
+                <field name="date"/>
+                <field name="check_in" string="CheckIn"/>
+                <field name="check_out" string="Checkout" optional="hide"/>
+                <field name="planned_time" optional="show" widget="float_time"/>
+                <field name="visitor_properties" string="Properties" optional="hide"/>
+                <field name="duration" widget="float_time" optional="show"/>
+                <field name="planned_duration" readonly="1"/>
+                <field name="nfc_card_number" readonly="1" optional="show"/>
+                <field name="location_description" readonly="1" optional="hide"/>
+                <field name="extension" readonly="1"/>
+                <field name="extension_status" readonly="1"/>
+                <field name="station_id" optional="show"/>
+                <field name="is_finished" optional="hide"/>
+                <field name="state" widget="badge" optional="show"
+                    decoration-info="state in ('checked_out')"
+                    decoration-success="state in ('checked_in')"
+                    decoration-warning="state == 'planned'" decoration-muted="state in ('canceled')"/>
+                <field name="email" optional="hide"/>
+                <field name="source" optional="hide"/>
+                <button name="action_check_in" type="object" string="Check in" class="btn-primary"
+                    invisible="state not in ('planned','canceled')"/>
+                <button name="action_check_out" type="object" string="Check out" class="btn-secondary"
+                    invisible="state not in ('checked_in')"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_form" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.form</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_check_in" type="object"
+                        string="Check in" class="btn-primary"
+                        invisible="state not in ('planned','canceled')"/>
+                    <button name="action_canceled" type="object" string="Cancel"
+                        class="btn-muted" invisible="state not in ('planned')"/>
+                    <button name="action_check_out" type="object"
+                        string="Check out" class="btn-secondary"
+                        invisible="state not in ('checked_in')"/>
+                    <field name="state" widget="statusbar"/>
+                </header>
+                <sheet>
+                    <field name="active" invisible="1"/>
+                    <widget name="web_ribbon" title="Archived" bg_color="text-bg-danger" invisible="active"/>
+                    <field name="qr_code" widget="image" class="oe_avatar"/>
+                    <group>
+                        <group>
+                            <field name="partner_id" placeholder="E.g. What's your Name" context="{'default_is_visitor': True}"/>
+                            <field name="phone"/>
+                            <field name="email"/>
+                            <field name="parent_id" invisible="True"/>
+                            <field name="company_id"/>
+                            <field name="emp_id"/>
+                             <field name="operating_unit_id"
+                                groups="operating_unit.group_multi_operating_unit"
+                                options="{'no_create': True}"
+                            />
+                        </group>
+                        <group>
+                            <field name="station_id"/>
+                            <field name="department_id"/>
+                            <field name="employee_id"/>
+                            <field name="source"/>
+                            <field name="date"/>
+                            <field name="check_in" invisible="not check_in"/>
+                            <field name="check_out" invisible="not check_out"/>
+                            <field name="duration" widget="float_time" invisible="1"/>
+                            <field name="is_recurring" readonly="not state in ['planned']"/>
+                            <field name="planned_date" readonly="1"/>
+                            <field name="planned_date_end" readonly="1" invisible="not is_recurring"/>
+                            <field name="planned_duration" readonly="1"/>
+                            <field name="planned_time" readonly="1" widget="float_time"/>
+                            <field name="extension" readonly="1"/>
+                            <field name="extension_status" readonly="1"/>
+                            <field name="nfc_card_number"/>
+                            <field name="evaluation" readonly="1"/>
+                            <field name="evaluation_comment" readonly="1"/>
+                            <field name="visit_purpose"/>
+                            <field name="other_reason_id"/>
+                            <field name="accepted_employee_id" readonly="1"/>
+                            <field name="is_online" readonly="1"/>
+                            <field name="is_finished" readonly="1"/>
+                            <field name="wilayat_id" invisible="not is_online"/>
+                            <field name="visit_type" invisible="not is_online"/>
+                            <field name="cancel_reason" invisible="not state == 'canceled'"/>
+                        </group>
+                    </group>
+                    <div class="d-flex">
+                        <field name="visitor_properties" nolabel="1" columns="2"
+                            hideKanbanOption="1" hideAddButton="1"/>
+                    </div>
+                    <notebook>
+                        <page string="Personal Belongings">
+                            <field name="belonging_ids"
+                                   widget="one2many_list" nolabel="1">
+                                <tree decoration-success="permission == '0' or permission == '2'"
+                                      decoration-danger="permission == '1'"
+                                      string="Items" editable="bottom">
+                                    <field name="property_name"/>
+                                    <field name="property_count"/>
+                                    <field name="permission"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Related Visitors" invisible="not child_count">
+                            <field name="child_count" invisible="1"/>
+                            <field name="child_ids" readonly="1"/>
+                        </page>
+                        <page string="Area">
+                            <group>
+                                <field name="building_id"/>
+                                <field name="level_id" domain="[('building_id', '=', building_id)]"/>
+                                <field name="section_id" domain="[('level_id', '=', level_id)]"/>
+                                <field name="location_description"/>
+                            </group>
+                            <group>
+                                <field name="location_type"/>
+                                <field name="owwsc_meeting_hall_id" invisible="not location_type == 'meeting_hall'" domain="[('section_id', '=', section_id)]"/>
+                                <field name="owwsc_office_id" invisible="not location_type == 'office'" domain="[('section_id', '=', section_id)]"/>
+                                <field name="owwsc_department_id" invisible="not location_type == 'department'" domain="[('section_id', '=', section_id)]"/>
+                            </group>
+                        </page>
+                        <page string="Message">
+                            <field name="message"/>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_kanban" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.kanban</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="oe_kanban_card oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <div class="o_kanban_record_headings">
+                                    <strong class="o_kanban_record_title"><span><field name="partner_id"/></span></strong>
+                                </div>
+                                <field name="state" widget="label_selection"
+                                    options="{'classes': {'checked_out': 'info',
+                                    'checked_in': 'success', 'planned': 'warning', 'canceled': 'muted'}}"/>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="station_id"/>
+                            </div>
+                            <div class="oe_kanban_footer">
+                                <div class="o_kanban_record_bottom mt-3">
+                                    <div class="oe_kanban_bottom_left">
+                                        <field name="check_in" widget="date"/>
+                                    </div>
+                                    <div class="oe_kanban_bottom_right">
+                                        <field name="department_id"/>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_graph" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.graph</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="priority">14</field>
+        <field name="arch" type="xml">
+            <graph string="Visitors" sample="1">
+                <field name="duration" invisible="1"/>
+                <field name="station_id"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_pivot" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.pivot</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <pivot string="Visitors">
+                <field name="station_id" type="col"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_calendar" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.calendar</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <calendar date_start="check_in" color="state">
+                <field name="partner_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_gantt" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.gantt</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <gantt date_start="check_in" date_stop="check_out" default_group_by="state"
+                default_scale="week">
+                <field name="partner_id"/>
+            </gantt>
+        </field>
+    </record>
+
+    <record id="frontdesk_visitor_view_search" model="ir.ui.view">
+        <field name="name">frontdesk.visitor.view.search</field>
+        <field name="model">frontdesk.visitor</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="partner_id" string="Visitor" filter_domain="['|', '|', ('qr_string', 'ilike', self), ('parent_id.qr_string', 'ilike', self), ('partner_id.name', 'ilike', self)]"/>
+                <field name="department_id" string="Department"/>
+                <field name="station_id" string="CheckIn Desk"/>
+                <filter string="Planned" name="state_is_planned"
+                    domain="[('state', '=', 'planned')]"/>
+                <filter string="Checked-In" name="state_is_checked_in"
+                    domain="[('state', '=', 'checked_in')]"/>
+                <filter string="Checked-out" name="state_is_checked_out"
+                    domain="[('state', '=', 'checked_out')]"/>
+                <filter string="Phone visits" name="phone_visits"
+                    domain="[('source', '=', 'phone')]"/>
+                <filter string="In Person visits" name="in_person_visits"
+                    domain="[('source', '=', 'in_person')]"/>
+                <filter string="Online visits" name="online_visits"
+                    domain="[('source', '=', 'online')]"/>
+                    
+                <filter string="Matching Building" name="matching_building"
+                    domain="[('same_building', '=', True)]"/>
+                <separator/>
+                <filter string="Today" name="today"
+                    domain="[('date', '&gt;=', datetime.datetime.combine(context_today(),
+                    datetime.time(0,0,0))), ('date', '&lt;=', datetime.datetime.combine(context_today(), datetime.time(23,59,59)))]"/>
+                <filter string="Date" name="check_in" date="check_in"/>
+                <separator/>
+                <filter string="Primary Visitor" name="primary"
+                    domain="[('parent_id', '=', False)]"/>
+                <separator/>
+                <filter string="Archived" name="inactive" domain="[('active', '=', False)]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Desk" name="group_by_station" context="{'group_by': 'station_id'}"/>
+                    <filter string="Date" name="group_by_date" context="{'group_by': 'check_in'}"/>
+                    <filter string="Department" name="group_by_host" context="{'group_by': 'department_id'}"/>
+                    <filter string="Status" name="group_by_status" context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_frontdesk_visitor" model="ir.actions.act_window">
+        <field name="name">Visitors</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar,gantt</field>
+        <field name="context">{
+            "search_default_state_is_planned": 1,
+            "search_default_state_is_checked_in": 1,
+            "search_default_today": 1,
+            "search_default_primary": 1,
+        }</field>
+    </record>
+
+    <record id="action_open_station_visitor" model="ir.actions.act_window">
+        <field name="name">Desk Visitors</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form,kanban,graph,pivot,calendar,gantt</field>
+        <field name="domain">[("station_id", "=", active_id)]</field>
+    </record>
+
+    <record id="action_open_guest_on_site_visitor" model="ir.actions.act_window">
+        <field name="name">Guest On Site</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[("station_id", "=", active_id)]</field>
+        <field name="context">{"search_default_state_is_checked_in": 1}</field>
+    </record>
+
+    <record id="action_open_new_requests" model="ir.actions.act_window">
+        <field name="name">New Requests</field>
+        <field name="res_model">frontdesk.request</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[("station_id", "=", active_id)]</field>
+        <field name="context">{"search_default_new": 1}</field>
+    </record>
+
+    <record id="action_open_planned_visitor" model="ir.actions.act_window">
+        <field name="name">Planned</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[("station_id", "=", active_id)]</field>
+        <field name="context">{"search_default_state_is_planned": 1}</field>
+    </record>
+
+    <record id="action_open_drink_to_serve_visitor" model="ir.actions.act_window">
+        <field name="name">Drinks to Serve</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="view_mode">tree,form</field>
+        <field name="domain">[("station_id", "=", active_id)]</field>
+        <field name="context">{"search_default_drink_to_serve": 1}</field>
+    </record>
+
+    <record id="frontdesk_visitor_action_configure_properties_field" model="ir.actions.client">
+        <field name="name">Add Properties</field>
+        <field name="res_model">frontdesk.visitor</field>
+        <field name="tag">action_configure_properties_field</field>
+        <field name="binding_model_id" ref="frontdesk.model_frontdesk_visitor"/>
+        <field name="binding_view_types">form</field>
+    </record>
+</odoo>

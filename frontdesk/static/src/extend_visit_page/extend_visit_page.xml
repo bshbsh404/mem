@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.ExtendVisit">
+        <div class="d-flex flex-column justify-content-center">
+            <div style="height: 400px;">
+                <h4 class="mb-0 mb-2 text-center">Scan your QR code to extend your visit!</h4>
+                <div id="reader" style="width: 50%; margin: 0 auto;"/>
+            </div>
+            <div t-if="state.showPopup" class="popup">
+                <div class="popup-content">
+                    <h3>Extend Visit Time</h3>
+                    <input type="number" placeholder="Enter extension time in minutes" t-model="state.extensionTime"/>
+                    <button class="btn btn-primary" t-on-click="submitExtension">Submit</button>
+                    <button class="btn btn-secondary" t-on-click="() => { state.showPopup = false; }">Cancel</button>
+                    <div t-if="state.errorMessage" class="alert alert-danger">
+                        <t t-esc="state.errorMessage"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
