@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit HR Employee Form View -->
+    <record id="hr_employee_form_outlook" model="ir.ui.view">
+        <field name="name">hr.employee.form.outlook</field>
+        <field name="model">hr.employee</field>
+        <field name="inherit_id" ref="hr.view_employee_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//page[@name='hr_settings']" position="after">
+                <page string="Outlook Integration" groups="base.group_system">
+                    <group>
+                        <field name="outlook_calendar_sync"/>
+                        <field name="outlook_calendar_id" attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}"/>
+                        <field name="outlook_token_expiry" attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}"/>
+                    </group>
+                    <group attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}">
+                        <button name="action_setup_outlook_sync" string="Setup Outlook Sync" type="object" class="btn-primary"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

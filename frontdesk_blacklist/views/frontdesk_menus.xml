@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Blacklist Menu -->
+    <menuitem id="menu_visitor_blacklist" 
+              name="Visitor Blacklist" 
+              parent="frontdesk.frontdesk_menu_configuration" 
+              action="action_visitor_blacklist"
+              groups="frontdesk_blacklist.group_blacklist_manager"
+              sequence="15"/>
+</odoo>

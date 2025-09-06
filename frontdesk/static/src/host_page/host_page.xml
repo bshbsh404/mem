@@ -68,7 +68,7 @@
                             </div>
                              <div class="mt-3">
                                 <label for="planned_date" class="form-label">Planned Date <t><span class="small text-danger">*</span></t></label>
-                                <input type="date" autocomplete="off" class="form-control" required="1" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="planned_date" t-ref="inputPlannedDate" t-att-min="new Date().toISOString().split('T')[0]"/>
+                                <input type="date" autocomplete="off" class="form-control" required="1" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="planned_date" t-ref="inputPlannedDate" t-att-min="new Date().toISOString().split('T')[0]" t-att-value="new Date().toISOString().split('T')[0]"/>
                             </div>
                              <div class="mt-3" t-if="state.isRecurring === 'on'">
                                 <label for="planned_date_end" class="form-label">Planned End Date <t><span class="small text-danger">*</span></t></label>
@@ -78,10 +78,6 @@
                             <div class="mt-3">
                                 <label for="planned_time" class="form-label">Planned Time <t><span class="small text-danger">*</span></t></label>
                                 <input type="time" autocomplete="off" class="form-control" required="1" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="planned_time" t-ref="inputPlannedTime"/>
-                            </div>
-                            <div class="mt-3">
-                                <label for="planned_duration" class="form-label">Planned Duration (Minutes) <t><span class="small text-danger">*</span></t></label>
-                                <input type="number" autocomplete="off" step="1" min="0" class="form-control" required="1" t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" id="planned_duration" t-ref="inputPlannedDuration"/>
                             </div>
                             <!-- add check button to agree  -->
                             <div class="mt-3">

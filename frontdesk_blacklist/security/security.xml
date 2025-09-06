@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Blacklist Manager Group -->
+    <record id="group_blacklist_manager" model="res.groups">
+        <field name="name">Blacklist Manager</field>
+        <field name="category_id" ref="base.module_category_human_resources_frontdesk"/>
+        <field name="comment">Users who can manage visitor blacklist</field>
+    </record>
+</odoo>

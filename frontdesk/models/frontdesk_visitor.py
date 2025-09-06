@@ -112,6 +112,20 @@ class FrontdeskVisitor(models.Model):
     evaluation_comment = fields.Text(string='Evaluation Comment')
     visit_purpose = fields.Text(string="Visit Purpose")
     emp_id = fields.Char(string="Employee ID")
+    
+    # Visitor card number display
+    visitor_card_display = fields.Char(string="Visitor Card", compute="_compute_visitor_card_display", store=True)
+    
+    @api.depends('partner_id', 'partner_id.national_id', 'emp_id')
+    def _compute_visitor_card_display(self):
+        """Compute visitor card display based on visitor type"""
+        for visitor in self:
+            if visitor.emp_id:  # Employee visitor
+                visitor.visitor_card_display = f"{visitor.emp_id}S"
+            elif visitor.partner_id and visitor.partner_id.national_id:  # External visitor
+                visitor.visitor_card_display = f"{visitor.partner_id.national_id}V"
+            else:
+                visitor.visitor_card_display = False
 
     building_id = fields.Many2one('owwsc.building', string="Building")
     level_id = fields.Many2one('owwsc.level', string="Level")
@@ -220,7 +234,27 @@ class FrontdeskVisitor(models.Model):
 
     def action_canceled(self):
         self.ensure_one()
+        old_state = self.state
         self.state = 'canceled'
+        
+        # Send SMS notification for rejected visit without reason
+        if old_state == 'planned' and not self.cancel_reason:
+            self._send_rejected_visit_sms()
+    
+    def _send_rejected_visit_sms(self):
+        """Send SMS to visitor when visit is rejected by host employee without reason"""
+        try:
+            if self.phone:
+                message = f"Dear {self.partner_id.name} your visit was rejected by the employee please create another visit. Nama Water Services"
+                
+                self.env['sms.sms'].create({
+                    'body': message,
+                    'number': self.phone,
+                })._send(using_template=False)
+                
+                _logger.info('Sent rejection SMS to visitor %s at number %s', self.partner_id.name, self.phone)
+        except Exception as e:
+            _logger.error('Error sending rejection SMS: %s', e)
 
     def action_request_extend_visit(self):
         self.ensure_one()
@@ -512,6 +546,35 @@ class FrontdeskVisitor(models.Model):
                     visitor.state = 'absent'
             elif visitor.date < fields.Date.today():
                 visitor.state = 'absent'
+    
+    @api.model
+    def auto_delete_non_approved_requests(self):
+        """Delete all non-approved requests at end of working hours"""
+        _logger.info('Checking for auto-delete of non-approved requests')
+        now = fields.Datetime.now()
+        
+        # Get all frontdesk stations with auto-delete enabled
+        frontdesks = self.env['frontdesk.frontdesk'].search([
+            ('enable_auto_delete_requests', '=', True)
+        ])
+        
+        for frontdesk in frontdesks:
+            # Convert auto_delete_time to datetime for today
+            hour = int(frontdesk.auto_delete_time)
+            minute = int((frontdesk.auto_delete_time % 1) * 60)
+            delete_time = datetime.combine(date.today(), time(hour, minute))
+            
+            if now >= delete_time:
+                # Find non-approved requests for today
+                visitors_to_delete = self.search([
+                    ('station_id', '=', frontdesk.id),
+                    ('date', '=', fields.Date.today()),
+                    ('state', '=', 'planned'),
+                ])
+                
+                if visitors_to_delete:
+                    _logger.info(f'Auto-deleting {len(visitors_to_delete)} non-approved requests for frontdesk {frontdesk.name}')
+                    visitors_to_delete.unlink()
         
     
     @api.model

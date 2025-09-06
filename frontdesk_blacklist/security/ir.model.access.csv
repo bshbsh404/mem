@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_visitor_blacklist_manager,visitor.blacklist.manager,model_visitor_blacklist,group_blacklist_manager,1,1,1,1
+access_visitor_blacklist_user,visitor.blacklist.user,model_visitor_blacklist,frontdesk.frontdesk_group_user,1,0,0,0
+access_visitor_blacklist_admin,visitor.blacklist.admin,model_visitor_blacklist,frontdesk.frontdesk_group_administrator,1,1,1,1

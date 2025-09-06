@@ -137,4 +137,11 @@
         <field name="perm_create" eval="1"/>
         <field name="perm_unlink" eval="1"/>
     </record>
+
+    <!-- Visit Report Managers Group -->
+    <record id="group_visit_report_managers" model="res.groups">
+        <field name="name">Visit Report Managers</field>
+        <field name="category_id" ref="base.module_category_human_resources_frontdesk"/>
+        <field name="comment">Group for users who can access visit reports</field>
+    </record>
 </odoo>

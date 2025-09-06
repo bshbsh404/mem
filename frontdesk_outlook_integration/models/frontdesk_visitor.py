@@ -1,0 +1,196 @@
+# -*- coding: utf-8 -*-
+# Part of Odoo. See LICENSE file for full copyright and licensing details.
+
+import requests
+import json
+import logging
+from datetime import datetime, timedelta
+from odoo import models, fields, api, _
+
+_logger = logging.getLogger(__name__)
+
+
+class FrontdeskVisitor(models.Model):
+    _inherit = 'frontdesk.visitor'
+    
+    outlook_event_id = fields.Char(string='Outlook Event ID', readonly=True)
+    outlook_event_url = fields.Char(string='Outlook Event URL', readonly=True)
+    outlook_sync_status = fields.Selection([
+        ('not_synced', 'Not Synced'),
+        ('synced', 'Synced'),
+        ('sync_failed', 'Sync Failed'),
+        ('cancelled', 'Cancelled')
+    ], string='Outlook Sync Status', default='not_synced', readonly=True)
+    
+    def create_outlook_event(self):
+        """Create event in host employee's Outlook calendar"""
+        for visitor in self:
+            if not visitor.host_ids:
+                continue
+                
+            for host in visitor.host_ids:
+                if not host.outlook_calendar_sync or not host.outlook_access_token:
+                    continue
+                    
+                try:
+                    event_data = visitor._prepare_outlook_event_data()
+                    event_id = visitor._send_outlook_request(host, 'POST', '/events', event_data)
+                    
+                    if event_id:
+                        visitor.write({
+                            'outlook_event_id': event_id,
+                            'outlook_sync_status': 'synced'
+                        })
+                        _logger.info(f'Created Outlook event {event_id} for visitor {visitor.partner_id.name}')
+                    else:
+                        visitor.outlook_sync_status = 'sync_failed'
+                        
+                except Exception as e:
+                    _logger.error(f'Error creating Outlook event for visitor {visitor.partner_id.name}: {e}')
+                    visitor.outlook_sync_status = 'sync_failed'
+    
+    def update_outlook_event(self):
+        """Update existing Outlook event"""
+        for visitor in self:
+            if not visitor.outlook_event_id:
+                continue
+                
+            for host in visitor.host_ids:
+                if not host.outlook_calendar_sync or not host.outlook_access_token:
+                    continue
+                    
+                try:
+                    event_data = visitor._prepare_outlook_event_data()
+                    success = visitor._send_outlook_request(
+                        host, 'PATCH', f'/events/{visitor.outlook_event_id}', event_data
+                    )
+                    
+                    if success:
+                        _logger.info(f'Updated Outlook event {visitor.outlook_event_id} for visitor {visitor.partner_id.name}')
+                    else:
+                        visitor.outlook_sync_status = 'sync_failed'
+                        
+                except Exception as e:
+                    _logger.error(f'Error updating Outlook event for visitor {visitor.partner_id.name}: {e}')
+                    visitor.outlook_sync_status = 'sync_failed'
+    
+    def cancel_outlook_event(self):
+        """Cancel/delete Outlook event"""
+        for visitor in self:
+            if not visitor.outlook_event_id:
+                continue
+                
+            for host in visitor.host_ids:
+                if not host.outlook_calendar_sync or not host.outlook_access_token:
+                    continue
+                    
+                try:
+                    success = visitor._send_outlook_request(
+                        host, 'DELETE', f'/events/{visitor.outlook_event_id}'
+                    )
+                    
+                    if success:
+                        visitor.write({
+                            'outlook_event_id': False,
+                            'outlook_sync_status': 'cancelled'
+                        })
+                        _logger.info(f'Cancelled Outlook event for visitor {visitor.partner_id.name}')
+                    else:
+                        visitor.outlook_sync_status = 'sync_failed'
+                        
+                except Exception as e:
+                    _logger.error(f'Error cancelling Outlook event for visitor {visitor.partner_id.name}: {e}')
+                    visitor.outlook_sync_status = 'sync_failed'
+    
+    def _prepare_outlook_event_data(self):
+        """Prepare event data for Outlook API"""
+        start_time = datetime.combine(self.planned_date, datetime.min.time()) + timedelta(hours=int(self.planned_time), minutes=(self.planned_time % 1) * 60)
+        end_time = start_time + timedelta(minutes=self.planned_duration or 60)
+        
+        return {
+            'subject': f'Visit: {self.partner_id.name}',
+            'body': {
+                'contentType': 'HTML',
+                'content': f"""
+                    <p><strong>Visitor:</strong> {self.partner_id.name}</p>
+                    <p><strong>Phone:</strong> {self.phone or 'N/A'}</p>
+                    <p><strong>Email:</strong> {self.email or 'N/A'}</p>
+                    <p><strong>Company:</strong> {self.company_id.name if self.company_id else 'N/A'}</p>
+                    <p><strong>Purpose:</strong> {self.visit_purpose or 'N/A'}</p>
+                    <p><strong>Location:</strong> {self.location_description or 'N/A'}</p>
+                """
+            },
+            'start': {
+                'dateTime': start_time.strftime('%Y-%m-%dT%H:%M:%S'),
+                'timeZone': 'UTC'
+            },
+            'end': {
+                'dateTime': end_time.strftime('%Y-%m-%dT%H:%M:%S'),
+                'timeZone': 'UTC'
+            },
+            'attendees': [
+                {
+                    'emailAddress': {
+                        'address': self.email or '',
+                        'name': self.partner_id.name
+                    }
+                }
+            ],
+            'categories': ['Frontdesk Visit']
+        }
+    
+    def _send_outlook_request(self, host, method, endpoint, data=None):
+        """Send request to Microsoft Graph API"""
+        url = f'https://graph.microsoft.com/v1.0/me{endpoint}'
+        headers = {
+            'Authorization': f'Bearer {host.outlook_access_token}',
+            'Content-Type': 'application/json'
+        }
+        
+        try:
+            if method == 'POST':
+                response = requests.post(url, headers=headers, json=data)
+            elif method == 'PATCH':
+                response = requests.patch(url, headers=headers, json=data)
+            elif method == 'DELETE':
+                response = requests.delete(url, headers=headers)
+            else:
+                return False
+                
+            if response.status_code in [200, 201, 204]:
+                if method == 'POST':
+                    return response.json().get('id')
+                return True
+            else:
+                _logger.error(f'Outlook API error: {response.status_code} - {response.text}')
+                return False
+                
+        except Exception as e:
+            _logger.error(f'Error sending Outlook request: {e}')
+            return False
+    
+    @api.model
+    def create(self, vals):
+        """Override create to sync with Outlook when visit is created"""
+        visitor = super(FrontdeskVisitor, self).create(vals)
+        if visitor.state in ['planned', 'checked_in']:
+            visitor.create_outlook_event()
+        return visitor
+    
+    def write(self, vals):
+        """Override write to sync with Outlook when visit is updated"""
+        result = super(FrontdeskVisitor, self).write(vals)
+        
+        # If visit is approved/accepted, create Outlook event
+        if vals.get('state') in ['planned', 'checked_in'] and not self.outlook_event_id:
+            self.create_outlook_event()
+        
+        # If visit details changed, update Outlook event
+        elif self.outlook_event_id and any(field in vals for field in ['planned_date', 'planned_time', 'planned_duration', 'visit_purpose']):
+            self.update_outlook_event()
+        
+        # If visit is cancelled, cancel Outlook event
+        elif vals.get('state') == 'canceled' and self.outlook_event_id:
+            self.cancel_outlook_event()
+        
+        return result

@@ -251,32 +251,6 @@ export class HostPage extends Component {
             // }
         }
 
-        if ($('#planned_duration').length) {
-            var planned_duration = $('#planned_duration').val();
-        } else {
-            var planned_duration = '';
-        }
-
-        // planned_duration should be a number and Between 10 and 180
-        if (planned_duration === '' || planned_duration === null) {
-            this.state.errorMessage = "Please select a planned duration.";
-            setTimeout(() => {
-                const errorElement = document.getElementById("errorMessage");
-                if (errorElement) {
-                    errorElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100);
-            return;
-        } else if (isNaN(planned_duration) || planned_duration < 10 || planned_duration > 180) {
-            this.state.errorMessage = "Planned duration must be a number between 10 and 180 minutes.";
-            setTimeout(() => {
-                const errorElement = document.getElementById("errorMessage");
-                if (errorElement) {
-                    errorElement.scrollIntoView({ behavior: 'smooth' });
-                }
-            }, 100);    
-            return;
-        }
         
         if ($('#landline').length) {
             var landline = $('#landline').val();
@@ -364,7 +338,7 @@ export class HostPage extends Component {
         // can we print currentLang here?
         console.log("currentLang", this.currentLang);
 
-        this.props.setHostData(this.host, name, phone, email, is_recurring, planned_date, planned_date_end, planned_time, planned_duration, purpose, other_reason, landline, visit_type, wilayat, recaptcha_response, this.props.currentLang);
+        this.props.setHostData(this.host, name, phone, email, is_recurring, planned_date, planned_date_end, planned_time, 60, purpose, other_reason, landline, visit_type, wilayat, recaptcha_response, this.props.currentLang);
         this.props.showScreen("RegisterPage");
     }
 

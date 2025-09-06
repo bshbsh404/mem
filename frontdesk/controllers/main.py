@@ -826,3 +826,105 @@ class Frontdesk(http.Controller):
             return request.render('frontdesk.thank_you_page', {
                 'message': 'An error occurred while processing your request.'
             })
+    @http.route('/frontdesk/submit_group_reservation', type='json', auth='public', csrf=False, save_session=False)
+    def submit_group_reservation(self, **kwargs):
+        """Handle group reservation submission"""
+        try:
+            company_name = kwargs.get('company_name')
+            hosting_employee = kwargs.get('hosting_employee')
+            visit_date = kwargs.get('visit_date')
+            visit_time = kwargs.get('visit_time')
+            visitors = kwargs.get('visitors', [])
+            station_id = kwargs.get('station_id')
+            
+            if not all([company_name, hosting_employee, visit_date, visit_time, visitors, station_id]):
+                return {'success': False, 'error': 'Missing required fields'}
+            
+            # Parse visit datetime
+            visit_datetime = datetime.strptime(f"{visit_date} {visit_time}", '%Y-%m-%d %H:%M')
+            
+            # Convert time to float (hours)
+            planned_time = visit_datetime.hour + visit_datetime.minute / 60.0
+            
+            # Find or create company
+            company = request.env['res.partner'].sudo().search([
+                ('name', '=', company_name),
+                ('is_company', '=', True),
+                ('is_visitor', '=', True)
+            ], limit=1)
+            
+            if not company:
+                company = request.env['res.partner'].sudo().create({
+                    'name': company_name,
+                    'is_company': True,
+                    'is_visitor': True
+                })
+            
+            # Find hosting employee
+            host_employee = request.env['hr.employee'].sudo().search([
+                ('name', 'ilike', hosting_employee)
+            ], limit=1)
+            
+            created_visitors = []
+            
+            # Process each visitor
+            for visitor_data in visitors:
+                # Find or create visitor partner
+                visitor_partner = request.env['res.partner'].sudo().search([
+                    ('national_id', '=', visitor_data['id_number'])
+                ], limit=1)
+                
+                if not visitor_partner:
+                    visitor_partner = request.env['res.partner'].sudo().create({
+                        'name': visitor_data['name'],
+                        'email': visitor_data['email'],
+                        'phone': visitor_data['phone'],
+                        'national_id': visitor_data['id_number'],
+                        'is_visitor': True,
+                        'parent_id': company.id
+                    })
+                else:
+                    # Update existing partner
+                    visitor_partner.write({
+                        'name': visitor_data['name'],
+                        'email': visitor_data['email'],
+                        'phone': visitor_data['phone'],
+                        'parent_id': company.id
+                    })
+                
+                # Create visitor record
+                visitor_vals = {
+                    'partner_id': visitor_partner.id,
+                    'station_id': station_id,
+                    'date': visit_date,
+                    'planned_date': visit_date,
+                    'planned_time': planned_time,
+                    'planned_duration': 60,  # Default 1 hour
+                    'visit_purpose': f'Group visit for {company_name}',
+                    'source': 'online',
+                }
+                
+                # Add host employee if found
+                if host_employee:
+                    visitor_vals['host_ids'] = [(6, 0, [host_employee.id])]
+                    visitor_vals['employee_id'] = host_employee.id
+                
+                visitor = request.env['frontdesk.visitor'].sudo().create(visitor_vals)
+                created_visitors.append(visitor)
+            
+            # Link visitors as a group (first visitor as parent)
+            if len(created_visitors) > 1:
+                main_visitor = created_visitors[0]
+                for child_visitor in created_visitors[1:]:
+                    child_visitor.parent_id = main_visitor.id
+            
+            return {
+                'success': True, 
+                'message': f'Group reservation created successfully for {len(visitors)} visitors',
+                'visitor_count': len(visitors)
+            }
+            
+        except Exception as e:
+            _logger.error(f'Error submitting group reservation: {str(e)}')
+            return {'success': False, 'error': 'Failed to submit group reservation'}
+

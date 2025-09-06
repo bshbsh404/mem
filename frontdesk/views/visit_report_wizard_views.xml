@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Visit Report Wizard Form View -->
+    <record id="visit_report_wizard_form" model="ir.ui.view">
+        <field name="name">Visit Report Wizard</field>
+        <field name="model">visit.report.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Visit Report">
+                <group>
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="station_id"/>
+                        <field name="host_employee_id"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_generate_report" string="Generate Report" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Visit Report Line Tree View -->
+    <record id="visit_report_line_tree" model="ir.ui.view">
+        <field name="name">Visit Report Lines</field>
+        <field name="model">visit.report.line</field>
+        <field name="arch" type="xml">
+            <tree string="Visit Report" create="false" edit="false" delete="false">
+                <field name="host_name"/>
+                <field name="accepted_count"/>
+                <field name="rejected_count"/>
+                <field name="total_count"/>
+                <field name="date_from"/>
+                <field name="date_to"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Visit Report Wizard Action -->
+    <record id="action_visit_report_wizard" model="ir.actions.act_window">
+        <field name="name">Visit Report</field>
+        <field name="type">ir.actions.act_window</field>
+        <field name="res_model">visit.report.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Menu Item -->
+    <menuitem id="menu_visit_report_wizard" 
+              name="Visit Report" 
+              parent="frontdesk.frontdesk_menu_reports" 
+              action="action_visit_report_wizard"
+              groups="frontdesk.group_visit_report_managers"
+              sequence="10"/>
+</odoo>

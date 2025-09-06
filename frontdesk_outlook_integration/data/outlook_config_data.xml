@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Default Outlook Configuration -->
+        <record id="default_outlook_config" model="outlook.config">
+            <field name="name">Default Outlook Configuration</field>
+            <field name="client_id">your-client-id-here</field>
+            <field name="client_secret">your-client-secret-here</field>
+            <field name="tenant_id">your-tenant-id-here</field>
+            <field name="redirect_uri">http://localhost:8000/auth</field>
+            <field name="active">True</field>
+        </record>
+    </data>
+</odoo>

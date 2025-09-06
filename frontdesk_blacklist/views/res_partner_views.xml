@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Inherit Partner Form View -->
+    <record id="res_partner_form_blacklist" model="ir.ui.view">
+        <field name="name">res.partner.form.blacklist</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='category_id']" position="after">
+                <field name="is_blacklisted_from_visit" groups="frontdesk_blacklist.group_blacklist_manager" attrs="{'invisible': [('is_visitor', '=', False)]}"/>
+            </xpath>
+            <div class="oe_button_box" position="inside">
+                <button name="action_view_blacklist_records" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-ban"
+                        attrs="{'invisible': ['|', ('is_visitor', '=', False), ('blacklist_count', '=', 0)]}"
+                        groups="frontdesk_blacklist.group_blacklist_manager">
+                    <field name="blacklist_count" widget="statinfo" string="Blacklist"/>
+                </button>
+                <button name="action_blacklist_visitor" 
+                        type="object" 
+                        class="oe_stat_button" 
+                        icon="fa-plus"
+                        attrs="{'invisible': ['|', ('is_visitor', '=', False), ('is_blacklisted_from_visit', '=', True)]}"
+                        groups="frontdesk_blacklist.group_blacklist_manager">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_text">Add to</span>
+                        <span class="o_stat_text">Blacklist</span>
+                    </div>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>

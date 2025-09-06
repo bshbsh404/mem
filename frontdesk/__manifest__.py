@@ -15,6 +15,7 @@
         'security/security.xml',
         'security/ir.model.access.csv',
         'data/frontdesk_cron.xml',
+        'data/frontdesk_auto_delete_cron.xml',
         'views/frontdesk_report_views.xml',
         'views/frontdesk_drink_views.xml',
         'views/frontdesk_visitor_views.xml',
@@ -39,6 +40,7 @@
         'views/portal_employee.xml',
         'views/hr_department.xml',
         'views/templates.xml',
+        'views/visit_report_wizard_views.xml',
     ],
     'demo': [
         'demo/frontdesk_demo.xml',

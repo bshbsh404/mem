@@ -130,6 +130,10 @@ class Frontdesk(models.Model):
 
     working_hours_start = fields.Float(string='Working Hours Start', default=7.0)
     working_hours_end = fields.Float(string='Working Hours End', default=15.0)
+    
+    # End of working hours auto-delete configuration
+    enable_auto_delete_requests = fields.Boolean(string='Auto-Delete Requests at End of Working Hours', default=False)
+    auto_delete_time = fields.Float(string='Auto-Delete Time', default=17.0, help="Time in 24-hour format (e.g., 17.5 for 5:30 PM)")
     email_host_domain = fields.Char(string='Host Email Domain', help='Host email domain to be used for host selection.', default="@owwsc.om")
 
     #### Reminder notification ####
