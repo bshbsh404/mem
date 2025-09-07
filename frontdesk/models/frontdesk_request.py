@@ -278,9 +278,42 @@ class VisitRequest(models.Model):
     
     def confirm_reject(self):
         for request in self:
-            if not request.reject_reason_id:
-                raise UserError(_("Please provide a reason for rejection."))
+            _logger.info('Confirming rejection for request %s', request.name)
+            # if not request.reject_reason_id:
+                # Send SMS notification when rejecting without reason
+            self._send_rejection_sms()
             request.write({'state': 'rejected'})
+    
+    def _send_rejection_sms(self):
+        """Send SMS to visitor when visit request is rejected by host employee"""
+        self.ensure_one()
+        try:
+            _logger.info('Sending rejection SMS to visitor %s', self.visitor_id.name if self.visitor_id else 'No Visitor')
+            if self.visitor_id and self.visitor_id.phone:
+                # Use the SMS template for rejection
+                template = self.env.ref('frontdesk.frontdesk_rejection_sms_template', raise_if_not_found=False)
+                if template:
+                    # Send SMS using the template with the request record
+                    # template.send_sms(self.id)
+                    body = template._render_field('body', self.ids, compute_lang=True)[self.id]
+                
+                    self.env['sms.sms'].create({
+                        'body': body,
+                        'number': self.visitor_id.phone,
+                    })._send(using_template=True)
+                    _logger.info('Sent rejection SMS to visitor %s at number %s using template', self.visitor_id.name, self.visitor_id.phone)
+                else:
+                    # Fallback to hardcoded message if template not found
+                    message = f"Dear {self.visitor_id.name}, your visit was rejected by the employee. Please create another visit. Nama Water Services"
+                    
+                    self.env['sms.sms'].create({
+                        'body': message,
+                        'number': self.visitor_id.phone,
+                    })._send(using_template=False)
+                    
+                    _logger.warning('SMS template not found, sent rejection SMS with hardcoded message to visitor %s', self.visitor_id.name)
+        except Exception as e:
+            _logger.error('Error sending rejection SMS: %s', e)
     
     def send_email_to_host(self):
         for request in self.filtered(lambda r: r.state == 'draft'):

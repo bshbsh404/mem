@@ -236,32 +236,6 @@ class FrontdeskVisitor(models.Model):
         self.ensure_one()
         old_state = self.state
         self.state = 'canceled'
-        
-        # Send SMS notification for rejected visit without reason
-        if old_state == 'planned' and not self.cancel_reason:
-            self._send_rejected_visit_sms()
-    
-    def _send_rejected_visit_sms(self):
-        """Send SMS to visitor when visit is rejected by host employee without reason"""
-        try:
-            if self.phone:
-                # Use the SMS template for rejection
-                template = self.env.ref('frontdesk.frontdesk_rejection_sms_template', raise_if_not_found=False)
-                if template:
-                    template.send_sms(self.id)
-                    _logger.info('Sent rejection SMS to visitor %s at number %s using template', self.partner_id.name, self.phone)
-                else:
-                    # Fallback to hardcoded message if template not found
-                    message = f"Dear {self.partner_id.name}, your visit was rejected by the employee. Please create another visit. Nama Water Services"
-                    
-                    self.env['sms.sms'].create({
-                        'body': message,
-                        'number': self.phone,
-                    })._send(using_template=False)
-                    
-                    _logger.warning('SMS template not found, sent rejection SMS with hardcoded message to visitor %s at number %s', self.partner_id.name, self.phone)
-        except Exception as e:
-            _logger.error('Error sending rejection SMS: %s', e)
 
     def action_request_extend_visit(self):
         self.ensure_one()

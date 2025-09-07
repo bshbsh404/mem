@@ -54,9 +54,9 @@
         <!-- frontdesk_rejection_sms_template -->
         <record id="frontdesk_rejection_sms_template" model="sms.template">
             <field name="name">Frontdesk Visit Rejection SMS Template</field>
-            <field name="model_id" ref="frontdesk.model_frontdesk_visitor"/>
-            <field name="lang">{{ object.preferred_language }}</field>
-            <field name="body">Dear {{ object.partner_id.name }}, your visit was rejected by the employee. Please create another visit. Nama Water Services</field>
+            <field name="model_id" ref="frontdesk.model_frontdesk_request"/>
+            <field name="lang">{{ object.visitor_id.lang }}</field>
+            <field name="body">Dear {{ object.visitor_id.name }}, your visit was rejected by the employee. Please create another visit. Nama Water Services</field>
         </record>
     </data>
 </odoo>
