@@ -889,7 +889,11 @@ class Frontdesk(http.Controller):
             
             # hosting_employee is already loaded above as the record
             
-            created_visitors = []
+            # Generate a unique group reference for linking requests
+            from datetime import datetime
+            group_reference = f"GRP-{visit_date.replace('-', '')}-{datetime.now().strftime('%H%M%S')}-{len(visitors)}"
+            
+            created_requests = []
             
             # Process each visitor
             for visitor_data in visitors:
@@ -916,36 +920,37 @@ class Frontdesk(http.Controller):
                         'parent_id': company.id
                     })
                 
-                # Create visitor record
-                visitor_vals = {
-                    'partner_id': visitor_partner.id,
+                # Create visit request record (not visitor directly)
+                request_vals = {
+                    'name': visitor_data['name'],
+                    'email': visitor_data['email'],
+                    'phone': visitor_data['phone'],
+                    'visitor_id': visitor_partner.id,
                     'station_id': station_id,
                     'date': visit_date,
-                    'planned_date': visit_date,
                     'planned_time': planned_time,
                     'planned_duration': 60,  # Default 1 hour
-                    'visit_purpose': f'Group visit for {company_name}',
+                    'visit_purpose': f'Group visit for {company_name} [{group_reference}]',
                     'source': 'online',
+                    'state': 'draft',
+                    'company_id': company.id,
                 }
                 
                 # Add host employee if found
                 if hosting_employee:
-                    visitor_vals['host_ids'] = [(6, 0, [hosting_employee.id])]
-                    visitor_vals['employee_id'] = hosting_employee.id
+                    request_vals['employee_id'] = hosting_employee.id
                 
-                visitor = request.env['frontdesk.visitor'].sudo().create(visitor_vals)
-                created_visitors.append(visitor)
+                visit_request = request.env['frontdesk.request'].sudo().create(request_vals)
+                created_requests.append(visit_request)
             
-            # Link visitors as a group (first visitor as parent)
-            if len(created_visitors) > 1:
-                main_visitor = created_visitors[0]
-                for child_visitor in created_visitors[1:]:
-                    child_visitor.parent_id = main_visitor.id
+            # Requests are grouped by the group_reference in their visit_purpose
+            # The host employee can approve/reject them as a group or individually
             
             return {
                 'success': True, 
-                'message': f'Group reservation created successfully for {len(visitors)} visitors',
-                'visitor_count': len(visitors)
+                'message': f'Group reservation requests created successfully for {len(visitors)} visitors. Awaiting host approval.',
+                'request_count': len(created_requests),
+                'request_ids': [req.id for req in created_requests]
             }
             
         except Exception as e:
