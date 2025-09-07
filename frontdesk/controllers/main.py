@@ -887,10 +887,7 @@ class Frontdesk(http.Controller):
                     'is_visitor': True
                 })
             
-            # Find hosting employee
-            host_employee = request.env['hr.employee'].sudo().search([
-                ('name', 'ilike', hosting_employee)
-            ], limit=1)
+            # hosting_employee is already loaded above as the record
             
             created_visitors = []
             

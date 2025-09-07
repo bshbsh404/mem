@@ -11,6 +11,7 @@ export class GroupReservations extends Component {
         // References for form fields
         this.inputCompanyNameRef = useRef("inputCompanyName");
         this.inputHostingEmployeeRef = useRef("inputHostingEmployee");
+        this.inputHostingEmployeeSearchRef = useRef("inputHostingEmployeeSearch");
         this.inputVisitDateRef = useRef("inputVisitDate");
         this.inputVisitTimeRef = useRef("inputVisitTime");
         
@@ -18,7 +19,12 @@ export class GroupReservations extends Component {
             errorMessage: null,
             visitors: [],
             nextVisitorId: 1,
-            employees: []
+            employees: [],
+            filteredEmployees: [],
+            showEmployeeDropdown: false,
+            employeeSearchQuery: '',
+            selectedEmployeeId: null,
+            selectedEmployeeName: ''
         });
         
         // Load employees on component mount
@@ -30,11 +36,56 @@ export class GroupReservations extends Component {
             const response = await this.rpc("/frontdesk/get_all_employees", {});
             if (response && response.employees) {
                 this.state.employees = response.employees;
+                this.state.filteredEmployees = response.employees;
             }
         } catch (error) {
             console.error("Error loading employees:", error);
             this.state.errorMessage = "Error loading employees list.";
         }
+    }
+    
+    _onEmployeeSearch(event) {
+        const query = event.target.value.toLowerCase();
+        this.state.employeeSearchQuery = query;
+        
+        if (query.length === 0) {
+            this.state.filteredEmployees = this.state.employees;
+            this.state.showEmployeeDropdown = false;
+        } else {
+            this.state.filteredEmployees = this.state.employees.filter(employee => 
+                employee.name.toLowerCase().includes(query) ||
+                (employee.department && employee.department.toLowerCase().includes(query))
+            );
+            this.state.showEmployeeDropdown = true;
+        }
+    }
+    
+    _onEmployeeSearchFocus() {
+        if (this.state.employeeSearchQuery) {
+            this.state.showEmployeeDropdown = true;
+        }
+    }
+    
+    _onEmployeeSearchBlur() {
+        // Delay hiding dropdown to allow for click events
+        setTimeout(() => {
+            this.state.showEmployeeDropdown = false;
+        }, 200);
+    }
+    
+    _onEmployeeSelect(event) {
+        event.preventDefault();
+        const employeeId = event.currentTarget.getAttribute('data-employee-id');
+        const employeeName = event.currentTarget.getAttribute('data-employee-name');
+        
+        this.state.selectedEmployeeId = parseInt(employeeId);
+        this.state.selectedEmployeeName = employeeName;
+        this.state.employeeSearchQuery = employeeName;
+        this.state.showEmployeeDropdown = false;
+        
+        // Update form fields
+        this.inputHostingEmployeeSearchRef.el.value = employeeName;
+        this.inputHostingEmployeeRef.el.value = employeeId;
     }
     
     _addVisitor() {
@@ -134,11 +185,17 @@ export class GroupReservations extends Component {
     _resetForm() {
         this.inputCompanyNameRef.el.value = '';
         this.inputHostingEmployeeRef.el.value = '';
+        this.inputHostingEmployeeSearchRef.el.value = '';
         this.inputVisitDateRef.el.value = '';
         this.inputVisitTimeRef.el.value = '';
         this.state.visitors = [];
         this.state.nextVisitorId = 1;
         this.state.errorMessage = null;
+        this.state.selectedEmployeeId = null;
+        this.state.selectedEmployeeName = '';
+        this.state.employeeSearchQuery = '';
+        this.state.showEmployeeDropdown = false;
+        this.state.filteredEmployees = this.state.employees;
     }
 }
 
