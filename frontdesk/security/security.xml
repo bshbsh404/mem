@@ -144,4 +144,11 @@
         <field name="category_id" ref="base.module_category_human_resources_frontdesk"/>
         <field name="comment">Group for users who can access visit reports</field>
     </record>
+    
+    <!-- Frontdesk Configuration Group -->
+    <record id="group_frontdesk_configuration" model="res.groups">
+        <field name="name">Frontdesk Configuration</field>
+        <field name="category_id" ref="base.module_category_human_resources_frontdesk"/>
+        <field name="comment">Group for users who can access frontdesk configuration settings</field>
+    </record>
 </odoo>
