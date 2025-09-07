@@ -52,7 +52,7 @@
     <!-- Menu Item -->
     <menuitem id="menu_visit_report_wizard" 
               name="Visit Report" 
-              parent="frontdesk.frontdesk_menu_reports" 
+              parent="frontdesk.frontdesk_menu_report" 
               action="action_visit_report_wizard"
               groups="frontdesk.group_visit_report_managers"
               sequence="10"/>

@@ -18,13 +18,13 @@
                         string="Remove from Blacklist" 
                         type="object" 
                         icon="fa-unlock"
-                        attrs="{'invisible': [('active', '=', False)]}"
+                        invisible="active == False"
                         groups="frontdesk_blacklist.group_blacklist_manager"/>
                 <button name="action_add_to_blacklist" 
                         string="Add to Blacklist" 
                         type="object" 
                         icon="fa-lock"
-                        attrs="{'invisible': [('active', '=', True)]}"
+                        invisible="active == True"
                         groups="frontdesk_blacklist.group_blacklist_manager"/>
             </tree>
         </field>
@@ -41,13 +41,13 @@
                             string="Remove from Blacklist" 
                             type="object" 
                             class="btn-primary"
-                            attrs="{'invisible': [('active', '=', False)]}"
+                            invisible="active == False"
                             groups="frontdesk_blacklist.group_blacklist_manager"/>
                     <button name="action_add_to_blacklist" 
                             string="Add to Blacklist" 
                             type="object" 
                             class="btn-danger"
-                            attrs="{'invisible': [('active', '=', True)]}"
+                            invisible="active == True"
                             groups="frontdesk_blacklist.group_blacklist_manager"/>
                     <field name="active" widget="boolean_toggle"/>
                 </header>

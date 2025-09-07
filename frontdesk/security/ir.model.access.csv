@@ -38,3 +38,5 @@ access_meeting_hall,access.owwsc.meeting_hall,model_owwsc_meeting_hall,,1,0,0,0
 access_meeting_hall_admin,access.owwsc.meeting_hall.admin,model_owwsc_meeting_hall,frontdesk.group_visit_reassignment_manager,1,1,1,1
 access_frontdesk_operating_unit_change_reason_frontdesk_group_user,frontdesk.operating.unit.change.reason.frontdesk.user,model_frontdesk_operating_unit_change_reason,frontdesk.frontdesk_group_user,1,1,1,1
 access_frontdesk_operating_unit_change_reason_base_user,frontdesk.operating.unit.change.reason.user,model_frontdesk_operating_unit_change_reason,base.group_user,1,0,0,0
+access_frontdesk_visit_report_wizard_user,frontdesk.visit.report.wizard.user,model_visit_report_wizard,frontdesk.group_visit_report_managers,1,1,1,1
+access_frontdesk_visit_report_line_wizard_user,frontdesk.visit.report.line.user,model_visit_report_line,frontdesk.group_visit_report_managers,1,1,1,1
