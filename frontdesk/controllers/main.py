@@ -168,6 +168,28 @@ class Frontdesk(http.Controller):
             _logger.error(f"Error getting employee info: {str(e)}")
             return {'error': 'AD auth failed'}
     
+    @http.route('/frontdesk/get_all_employees', type='json', auth='public', csrf=False)
+    def get_all_employees(self):
+        """Get all employees for selection dropdown"""
+        try:
+            employees = request.env['hr.employee'].sudo().search([
+                ('active', '=', True)
+            ], order='name')
+            
+            employee_list = []
+            for emp in employees:
+                employee_list.append({
+                    'id': emp.id,
+                    'name': emp.name,
+                    'department': emp.department_id.name if emp.department_id else '',
+                    'work_email': emp.work_email or ''
+                })
+            
+            return {'employees': employee_list}
+        except Exception as e:
+            _logger.error(f"Error getting all employees: {str(e)}")
+            return {'employees': []}
+    
     @http.route('/frontdesk/group-reservations/<int:record_id>', type='http', auth='public', website=True)
     def download_group_reservations_attachment(self, record_id):
         if not record_id:
@@ -831,14 +853,19 @@ class Frontdesk(http.Controller):
         """Handle group reservation submission"""
         try:
             company_name = kwargs.get('company_name')
-            hosting_employee = kwargs.get('hosting_employee')
+            hosting_employee_id = kwargs.get('hosting_employee_id')
             visit_date = kwargs.get('visit_date')
             visit_time = kwargs.get('visit_time')
             visitors = kwargs.get('visitors', [])
             station_id = kwargs.get('station_id')
             
-            if not all([company_name, hosting_employee, visit_date, visit_time, visitors, station_id]):
+            if not all([company_name, hosting_employee_id, visit_date, visit_time, visitors, station_id]):
                 return {'success': False, 'error': 'Missing required fields'}
+                
+            # Get the hosting employee
+            hosting_employee = request.env['hr.employee'].sudo().browse(hosting_employee_id)
+            if not hosting_employee.exists():
+                return {'success': False, 'error': 'Invalid hosting employee'}
             
             # Parse visit datetime
             visit_datetime = datetime.strptime(f"{visit_date} {visit_time}", '%Y-%m-%d %H:%M')
@@ -905,9 +932,9 @@ class Frontdesk(http.Controller):
                 }
                 
                 # Add host employee if found
-                if host_employee:
-                    visitor_vals['host_ids'] = [(6, 0, [host_employee.id])]
-                    visitor_vals['employee_id'] = host_employee.id
+                if hosting_employee:
+                    visitor_vals['host_ids'] = [(6, 0, [hosting_employee.id])]
+                    visitor_vals['employee_id'] = hosting_employee.id
                 
                 visitor = request.env['frontdesk.visitor'].sudo().create(visitor_vals)
                 created_visitors.append(visitor)

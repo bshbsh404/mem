@@ -17,8 +17,24 @@ export class GroupReservations extends Component {
         this.state = useState({
             errorMessage: null,
             visitors: [],
-            nextVisitorId: 1
+            nextVisitorId: 1,
+            employees: []
         });
+        
+        // Load employees on component mount
+        this._loadEmployees();
+    }
+    
+    async _loadEmployees() {
+        try {
+            const response = await this.rpc("/frontdesk/get_all_employees", {});
+            if (response && response.employees) {
+                this.state.employees = response.employees;
+            }
+        } catch (error) {
+            console.error("Error loading employees:", error);
+            this.state.errorMessage = "Error loading employees list.";
+        }
     }
     
     _addVisitor() {
@@ -27,8 +43,7 @@ export class GroupReservations extends Component {
             name: '',
             email: '',
             phone: '',
-            idNumber: '',
-            employeeEmail: ''
+            idNumber: ''
         };
         this.state.visitors.push(newVisitor);
     }
@@ -54,8 +69,6 @@ export class GroupReservations extends Component {
             visitor.phone = value;
         } else if (fieldClass.includes('visitor-id-number')) {
             visitor.idNumber = value;
-        } else if (fieldClass.includes('visitor-employee-email')) {
-            visitor.employeeEmail = value;
         }
     }
     
@@ -70,11 +83,11 @@ export class GroupReservations extends Component {
         }
         
         const companyName = this.inputCompanyNameRef.el.value;
-        const hostingEmployee = this.inputHostingEmployeeRef.el.value;
+        const hostingEmployeeId = this.inputHostingEmployeeRef.el.value;
         const visitDate = this.inputVisitDateRef.el.value;
         const visitTime = this.inputVisitTimeRef.el.value;
         
-        if (!companyName || !hostingEmployee || !visitDate || !visitTime) {
+        if (!companyName || !hostingEmployeeId || !visitDate || !visitTime) {
             this.state.errorMessage = "Please fill in all required reservation details.";
             return;
         }
@@ -91,15 +104,14 @@ export class GroupReservations extends Component {
             // Submit group reservation
             const reservationData = {
                 company_name: companyName,
-                hosting_employee: hostingEmployee,
+                hosting_employee_id: parseInt(hostingEmployeeId),
                 visit_date: visitDate,
                 visit_time: visitTime,
                 visitors: this.state.visitors.map(visitor => ({
                     name: visitor.name,
                     email: visitor.email,
                     phone: visitor.phone,
-                    id_number: visitor.idNumber,
-                    employee_email: visitor.employeeEmail || false
+                    id_number: visitor.idNumber
                 })),
                 station_id: this.props.stationInfo.id
             };

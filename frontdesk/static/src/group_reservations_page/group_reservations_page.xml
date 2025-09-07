@@ -29,8 +29,13 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="mb-3">
-                                                <label for="hosting_employee" class="form-label">Hosting Employee's Name <span class="small text-danger">*</span></label>
-                                                <input type="text" class="form-control" id="hosting_employee" t-ref="inputHostingEmployee" required="required" placeholder="Enter hosting employee name"/>
+                                                <label for="hosting_employee" class="form-label">Hosting Employee <span class="small text-danger">*</span></label>
+                                                <select class="form-control" id="hosting_employee" t-ref="inputHostingEmployee" required="required">
+                                                    <option value="">Select an employee...</option>
+                                                    <t t-foreach="state.employees" t-as="employee" t-key="employee.id">
+                                                        <option t-att-value="employee.id" t-esc="employee.name"/>
+                                                    </t>
+                                                </select>
                                             </div>
                                         </div>
                                     </div>
@@ -118,20 +123,6 @@
                                                            t-on-input="_onVisitorFieldChange"
                                                            required="required" 
                                                            placeholder="Enter ID number"/>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <div class="mb-3">
-                                                    <label class="form-label">Visitor Employee Email (Optional)</label>
-                                                    <input type="email" class="form-control visitor-employee-email" 
-                                                           t-att-data-visitor-id="visitor.id"
-                                                           t-att-value="visitor.employeeEmail"
-                                                           t-on-input="_onVisitorFieldChange"
-                                                           placeholder="If visitor is an employee, enter their company email"/>
-                                                    <small class="form-text text-muted">Leave empty for external visitors</small>
                                                 </div>
                                             </div>
                                         </div>
