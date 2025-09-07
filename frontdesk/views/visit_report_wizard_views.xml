@@ -6,18 +6,28 @@
         <field name="model">visit.report.wizard</field>
         <field name="arch" type="xml">
             <form string="Visit Report">
-                <group>
+                <sheet>
+                    <div class="oe_title">
+                        <h2>Generate Visit Report</h2>
+                        <p class="text-muted">Count accepted and rejected visits by host employee for a period of time</p>
+                    </div>
                     <group>
-                        <field name="date_from"/>
-                        <field name="date_to"/>
+                        <group>
+                            <field name="date_from"/>
+                            <field name="date_to"/>
+                        </group>
+                        <group>
+                            <field name="station_id" options="{'no_create': True}" placeholder="All Stations (Optional)"/>
+                            <field name="host_employee_id" options="{'no_create': True}"/>
+                        </group>
                     </group>
-                    <group>
-                        <field name="station_id"/>
-                        <field name="host_employee_id"/>
+                    <group invisible="report_file == False">
+                        <field name="report_file" filename="report_filename" widget="binary" string="Download Excel Report"/>
+                        <field name="report_filename" invisible="1"/>
                     </group>
-                </group>
+                </sheet>
                 <footer>
-                    <button name="action_generate_report" string="Generate Report" type="object" class="btn-primary"/>
+                    <button name="action_generate_report" string="Generate Excel Report" type="object" class="btn-primary" icon="fa-file-excel-o"/>
                     <button string="Cancel" class="btn-secondary" special="cancel"/>
                 </footer>
             </form>
