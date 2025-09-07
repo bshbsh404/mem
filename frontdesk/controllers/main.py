@@ -890,8 +890,8 @@ class Frontdesk(http.Controller):
             # hosting_employee is already loaded above as the record
             
             # Generate a unique group reference for linking requests
-            from datetime import datetime
-            group_reference = f"GRP-{visit_date.replace('-', '')}-{datetime.now().strftime('%H%M%S')}-{len(visitors)}"
+            from datetime import datetime as dt
+            group_reference = f"GRP-{visit_date.replace('-', '')}-{dt.now().strftime('%H%M%S')}-{len(visitors)}"
             
             created_requests = []
             
