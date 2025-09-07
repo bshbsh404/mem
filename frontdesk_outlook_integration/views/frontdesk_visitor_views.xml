@@ -4,7 +4,7 @@
     <record id="frontdesk_visitor_form_outlook" model="ir.ui.view">
         <field name="name">frontdesk.visitor.form.outlook</field>
         <field name="model">frontdesk.visitor</field>
-        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_form"/>
+        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='evaluation_comment']" position="after">
                 <separator string="Outlook Integration"/>
@@ -19,7 +19,7 @@
     <record id="frontdesk_visitor_tree_outlook" model="ir.ui.view">
         <field name="name">frontdesk.visitor.tree.outlook</field>
         <field name="model">frontdesk.visitor</field>
-        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_tree"/>
+        <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='state']" position="after">
                 <field name="outlook_sync_status" optional="hide"/>
