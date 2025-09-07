@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_hr_employee_public,hr.employee public access,hr.model_hr_employee,,1,0,0,0
+access_frontdesk_visitor_public,frontdesk.visitor public access,frontdesk.model_frontdesk_visitor,,1,1,0,0
