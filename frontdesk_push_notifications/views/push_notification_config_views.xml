@@ -84,19 +84,19 @@
                                     <label for="push_notification_enabled" class="o_light_label col-sm-5 col-form-label"/>
                                     <field name="push_notification_enabled" class="ml16"/>
                                 </div>
-                                <div class="d-flex" attrs="{'invisible': [('push_notification_enabled', '=', False)]}">
+                                <div class="d-flex" invisible="not push_notification_enabled">
                                     <label for="push_api_url" class="o_light_label col-sm-5 col-form-label"/>
                                     <field name="push_api_url" class="ml16" placeholder="https://api.example.com/notifications"/>
                                 </div>
-                                <div class="d-flex" attrs="{'invisible': [('push_notification_enabled', '=', False)]}">
+                                <div class="d-flex" invisible="not push_notification_enabled">
                                     <label for="push_api_username" class="o_light_label col-sm-5 col-form-label"/>
                                     <field name="push_api_username" class="ml16" placeholder="API Username"/>
                                 </div>
-                                <div class="d-flex" attrs="{'invisible': [('push_notification_enabled', '=', False)]}">
+                                <div class="d-flex" invisible="not push_notification_enabled">
                                     <label for="push_api_password" class="o_light_label col-sm-5 col-form-label"/>
                                     <field name="push_api_password" class="ml16" placeholder="API Password" password="True"/>
                                 </div>
-                                <div class="d-flex" attrs="{'invisible': [('push_notification_enabled', '=', False)]}">
+                                <div class="d-flex" invisible="not push_notification_enabled">
                                     <label for="push_api_timeout" class="o_light_label col-sm-5 col-form-label"/>
                                     <field name="push_api_timeout" class="ml16"/>
                                 </div>

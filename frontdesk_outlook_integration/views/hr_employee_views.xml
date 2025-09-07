@@ -10,10 +10,10 @@
                 <page string="Outlook Integration" groups="base.group_system">
                     <group>
                         <field name="outlook_calendar_sync"/>
-                        <field name="outlook_calendar_id" attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}"/>
-                        <field name="outlook_token_expiry" attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}"/>
+                        <field name="outlook_calendar_id" invisible="not outlook_calendar_sync"/>
+                        <field name="outlook_token_expiry" invisible="not outlook_calendar_sync"/>
                     </group>
-                    <group attrs="{'invisible': [('outlook_calendar_sync', '=', False)]}">
+                    <group invisible="not outlook_calendar_sync">
                         <button name="action_setup_outlook_sync" string="Setup Outlook Sync" type="object" class="btn-primary"/>
                     </group>
                 </page>
