@@ -7,7 +7,6 @@
         <field name="arch" type="xml">
             <tree>
                 <field name="name"/>
-                <field name="api_url"/>
                 <field name="active"/>
             </tree>
         </field>
@@ -67,7 +66,7 @@
     <!-- Menu -->
     <menuitem id="menu_frontdesk_police_api_config"
               name="Police API"
-              parent="frontdesk.menu_frontdesk_config"
+              parent="frontdesk.frontdesk_menu_root"
               action="action_police_api_config"
               sequence="50"/>
 </odoo>

@@ -1,3 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_police_api_config_manager,police.api.config.manager,model_police_api_config,frontdesk.group_frontdesk_manager,1,1,1,1
-access_police_api_config_user,police.api.config.user,model_police_api_config,frontdesk.group_frontdesk_user,1,0,0,0
+access_police_api_config_manager,police.api.config.manager,model_police_api_config,frontdesk.frontdesk_group_administrator,1,1,1,1
+access_police_api_config_user,police.api.config.user,model_police_api_config,frontdesk.frontdesk_group_user,1,0,0,0
