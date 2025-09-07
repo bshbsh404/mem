@@ -56,10 +56,23 @@ export class VisitorForm extends Component {
             const result = await this.rpc("/frontdesk/get_employee_info", { emp_id: empID });
             if (result && !result.error) {
                 this.inputNameRef.el.value = result.name || "";
-                this.inputSecondNameRef.el.value = result.second_name || "";
-                this.inputThirdNameRef.el.value = result.third_name || "";
-                this.inputFourthNameRef.el.value = result.fourth_name || "";
-                // if identification_id is set, then set it to inputVisitorIDRef  
+                if (this.inputSecondNameRef.el) {
+                    this.inputSecondNameRef.el.value = result.second_name || "";
+                }
+                if (this.inputThirdNameRef.el) {
+                    this.inputThirdNameRef.el.value = result.third_name || "";
+                }
+                if (this.inputFourthNameRef.el) {
+                    this.inputFourthNameRef.el.value = result.fourth_name || "";
+                }
+
+                if(this.inputSecondNameRef.el == null && this.inputThirdNameRef.el != null){
+                    this.inputThirdNameRef.el.value = result.second_name || "";
+                }else if(this.inputSecondNameRef.el == null && this.inputThirdNameRef.el == null){
+                    this.inputFourthNameRef.el.value = result.second_name || "";
+                }
+
+                // if identification_id is set, then set it to inputVisitorIDRef
                 try{
                     if (result.identification_id) {
                     this.inputVisitorIDRef.el.value = result.identification_id;
@@ -84,6 +97,7 @@ export class VisitorForm extends Component {
                 console.warn("Employee not found");
             }
         } catch (err) {
+            console.warn("RPC error:", err);
             console.error("Failed to fetch employee info");
         }
     }

@@ -210,7 +210,8 @@ class VisitRequest(models.Model):
     state = fields.Selection([
         ('draft', 'New'),
         ('approve', 'Approved'),
-        ('rejected', 'Rejected')
+        ('rejected', 'Rejected'),
+        ('blacklisted', 'Blacklisted'),
     ], required=True, default='draft', readonly=True)
     reject_reason_id = fields.Many2one('visit.reject.reason', string="Rejection Reason", required=False)
 
@@ -249,6 +250,9 @@ class VisitRequest(models.Model):
 
     def action_approve(self):
        self.create_visits()
+       if self.visitor_id.is_blacklisted_from_visit:
+            self.write({'state': 'blacklisted'})
+            raise UserError((f"The visitor {self.name} is blacklisted and cannot be approved."))
        self.write({'state': 'approve', 'response_time': fields.Datetime.now()})
     
     def action_reject_portal(self, reject_reason_id):
@@ -306,8 +310,9 @@ class VisitRequest(models.Model):
                 raise UserError(f"Please set an existing visitor or create one for the visitor {request.name}")
             
             if request.visitor_id.is_blacklisted_from_visit:
+                request.write({'state': 'blacklisted'})
                 raise UserError((f"The visitor {request.name} is blacklisted and cannot be approved."))
-
+            
             if not request.visitor_id.email:
                 raise UserError(f"Please set an email for visitor {request.name}")
 
