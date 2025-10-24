@@ -17,13 +17,14 @@ class FrontdeskVisitor(models.Model):
         help='Indicates whether push notification was sent for this visit'
     )
     
-    @api.model_create_multi
+    @api.model
     def create(self, vals_list):
         """Override create to send push notifications for new visits"""
         visitors = super(FrontdeskVisitor, self).create(vals_list)
         
         # Send push notifications for new visits
         for visitor in visitors:
+            _logger.error(f"_send_push_notification_if_enabled for visitor ID: {visitor.id}")
             visitor._send_push_notification_if_enabled()
         
         return visitors
@@ -35,21 +36,22 @@ class FrontdeskVisitor(models.Model):
         # Check if push notifications are enabled
         config_settings = self.env['res.config.settings']
         push_config = config_settings.get_push_config()
+        _logger.error(f"_send_push_notification_if_enabled Push notification config: {push_config}")
         
         if not push_config.get('enabled'):
-            _logger.debug("Push notifications are disabled")
+            _logger.error("Push notifications are disabled")
             return
         
         # Check if employee exists and has necessary information
         if not self.employee_id:
-            _logger.debug(f"No employee assigned to visitor {self.id}, skipping push notification")
+            _logger.error(f"No employee assigned to visitor {self.id}, skipping push notification")
             return
         
         # Get employee's USER_ID (we'll use employee ID as USER_ID for now)
         # In a real implementation, you might have a specific field mapping employee to USER_ID
         user_id = self._get_employee_user_id()
         if not user_id:
-            _logger.debug(f"No USER_ID found for employee {self.employee_id.name}, skipping push notification")
+            _logger.error(f"No USER_ID found for employee {self.employee_id.name}, skipping push notification")
             return
         
         # Prepare notification content
@@ -62,7 +64,7 @@ class FrontdeskVisitor(models.Model):
         # Update the flag based on result
         if result.get('success'):
             self.push_notification_sent = True
-            _logger.info(f"Push notification sent successfully for visitor {self.id}")
+            _logger.error(f"Push notification sent successfully for visitor {self.id}")
         else:
             _logger.error(f"Failed to send push notification for visitor {self.id}: {result.get('error')}")
     
@@ -113,8 +115,8 @@ class FrontdeskVisitor(models.Model):
             )
             
             # Log the request and response
-            _logger.debug(f"Push notification request payload: {json.dumps(payload)}")
-            _logger.debug(f"Push notification response status: {response.status_code}, Response: {response.text}")
+            _logger.error(f"Push notification request payload: {json.dumps(payload)}")
+            _logger.error(f"Push notification response status: {response.status_code}, Response: {response.text}")
             
             if response.status_code == 200:
                 return {

@@ -130,7 +130,8 @@ class VisitorApiController(http.Controller):
             # Process approval/rejection
             result = employee.approve_reject_visitor(approval_id, approve_reject_flag)
             
-            _logger.info(f"Employee {employee_number} {approve_reject_flag}d visitor {approval_id}: {result}")
+            _logger.error(f"Employee {employee_number} {approve_reject_flag}d visitor {approval_id}: {result}")
+            _logger.error(result)
             
             return result
             

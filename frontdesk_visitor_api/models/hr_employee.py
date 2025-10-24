@@ -2,6 +2,9 @@
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
 from odoo import models, fields
+import logging
+
+_logger = logging.getLogger(__name__)
 
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
@@ -16,11 +19,11 @@ class HrEmployee(models.Model):
         # Find pending visitor requests where this employee is the host
         domain = [
             ('employee_id', '=', self.id),
-            ('state', '=', 'planned'),
+            ('state', '=', 'draft'),
             ('date', '>=', fields.Date.today()),
         ]
         
-        visitors = self.env['frontdesk.visitor'].sudo().search(domain)
+        visitors = self.env['frontdesk.request'].sudo().search(domain)
         
         approvals = []
         for visitor in visitors:
@@ -28,10 +31,9 @@ class HrEmployee(models.Model):
             approval_id = f"A{visitor.id}"
             
             approvals.append({
-                'visitor_name': visitor.partner_id.name,
+                'visitor_name': visitor.name,
                 'approval_date': visitor.date.strftime('%Y-%m-%d') if visitor.date else '',
-                'approval_time': visitor.check_in.strftime('%I:%M %p') if visitor.check_in else 'Pending',
-                'purpose': visitor.purpose or 'Not specified',
+                'approval_time': visitor.date.strftime('%I:%M %p') if visitor.date else 'Pending',
                 'approval_id': approval_id,
             })
         
@@ -44,13 +46,18 @@ class HrEmployee(models.Model):
         try:
             # Extract visitor ID from approval ID (format: A123)
             visitor_id = int(approval_id.replace('A', ''))
+            _logger.error(visitor_id)
+            _logger.error(action)
+            _logger.error(self.id)
             
             # Find the visitor record
-            visitor = self.env['frontdesk.visitor'].sudo().search([
+            visitor = self.env['frontdesk.request'].sudo().search([
                 ('id', '=', visitor_id),
                 ('employee_id', '=', self.id),
-                ('state', '=', 'planned'),
+                ('state', '=', 'draft'),
             ], limit=1)
+            _logger.error(visitor)
+            _logger.error(visitor.state)
             
             if not visitor:
                 return {
@@ -62,15 +69,19 @@ class HrEmployee(models.Model):
             if action == 'approve':
                 # In frontdesk module, approval might mean just keeping it as planned
                 # or we could add a custom approval state/field
-                visitor.write({'state': 'planned'})  # Keep as planned (approved)
+                visitor.write({'state': 'approve'})  # Keep as planned (approved)
                 message = 'Visitor approved'
+                _logger.error("in Process the action approved")
+                _logger.error(visitor.state)
             elif action == 'reject':
                 visitor.write({
-                    'state': 'canceled',
-                    'cancel_reason': 'Rejected by host'
+                    'state': 'rejected',
                 })
+                _logger.error(visitor.state)
                 message = 'Visitor rejected'
+                _logger.error("in Process the action rejected")
             else:
+                print(visitor.state)
                 return {
                     'validation_message': 'Invalid action. Use "approve" or "reject"',
                     'status': 'N'
