@@ -255,6 +255,7 @@ VisitorForm.props = {
     updatePlannedVisitors: Function,
     visitorData: [Object, Boolean],
     theme: String,
+    frontdeskUrl: String,
 };
 
 registry.category("frontdesk_screens").add("VisitorForm", VisitorForm);
