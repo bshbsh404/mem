@@ -3,9 +3,9 @@
 
 import requests
 import logging
-import msal
 from odoo import models, fields, api, _
 from datetime import datetime, timedelta
+from werkzeug import urls
 
 _logger = logging.getLogger(__name__)
 
@@ -23,40 +23,36 @@ class OutlookConfig(models.Model):
 
     def get_auth_url(self):
         """Generate authorization URL for Microsoft OAuth"""
-        authority = f"https://login.microsoftonline.com/{self.tenant_id}"
-        scopes = ["https://graph.microsoft.com/Calendars.ReadWrite"]
+        params = {
+            'client_id': self.client_id,
+            'response_type': 'code',
+            'redirect_uri': self.redirect_uri,
+            'scope': 'https://graph.microsoft.com/Calendars.ReadWrite offline_access',
+            'response_mode': 'query',
+        }
         
-        app = msal.ConfidentialClientApplication(
-            self.client_id,
-            authority=authority,
-            client_credential=self.client_secret,
-        )
-        
-        auth_url = app.get_authorization_request_url(
-            scopes,
-            redirect_uri=self.redirect_uri
-        )
+        auth_url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/authorize?{urls.url_encode(params)}"
         return auth_url
 
     def get_access_token(self, auth_code):
         """Exchange authorization code for access token"""
         try:
-            authority = f"https://login.microsoftonline.com/{self.tenant_id}"
-            scopes = ["https://graph.microsoft.com/Calendars.ReadWrite"]
+            token_url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token"
             
-            app = msal.ConfidentialClientApplication(
-                self.client_id,
-                authority=authority,
-                client_credential=self.client_secret,
-            )
+            data = {
+                'client_id': self.client_id,
+                'client_secret': self.client_secret,
+                'code': auth_code,
+                'redirect_uri': self.redirect_uri,
+                'grant_type': 'authorization_code',
+                'scope': 'https://graph.microsoft.com/Calendars.ReadWrite offline_access',
+            }
             
-            result = app.acquire_token_by_authorization_code(
-                auth_code,
-                scopes=scopes,
-                redirect_uri=self.redirect_uri
-            )
+            response = requests.post(token_url, data=data, timeout=30)
+            response.raise_for_status()
+            result = response.json()
             
-            if result and 'access_token' in result:
+            if 'access_token' in result:
                 return {
                     'access_token': result.get('access_token'),
                     'refresh_token': result.get('refresh_token'),
@@ -70,24 +66,24 @@ class OutlookConfig(models.Model):
     def refresh_access_token(self, refresh_token):
         """Refresh access token using refresh token"""
         try:
-            authority = f"https://login.microsoftonline.com/{self.tenant_id}"
-            scopes = ["https://graph.microsoft.com/Calendars.ReadWrite"]
+            token_url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/token"
             
-            app = msal.ConfidentialClientApplication(
-                self.client_id,
-                authority=authority,
-                client_credential=self.client_secret,
-            )
+            data = {
+                'client_id': self.client_id,
+                'client_secret': self.client_secret,
+                'refresh_token': refresh_token,
+                'grant_type': 'refresh_token',
+                'scope': 'https://graph.microsoft.com/Calendars.ReadWrite offline_access',
+            }
             
-            result = app.acquire_token_by_refresh_token(
-                refresh_token,
-                scopes=scopes
-            )
+            response = requests.post(token_url, data=data, timeout=30)
+            response.raise_for_status()
+            result = response.json()
             
-            if result and 'access_token' in result:
+            if 'access_token' in result:
                 return {
                     'access_token': result.get('access_token'),
-                    'refresh_token': result.get('refresh_token'),
+                    'refresh_token': result.get('refresh_token', refresh_token),
                     'expires_in': result.get('expires_in', 3600)
                 }
             return None

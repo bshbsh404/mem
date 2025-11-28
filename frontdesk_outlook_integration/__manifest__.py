@@ -19,6 +19,6 @@
         'views/hr_employee_views.xml',
     ],
     'external_dependencies': {
-        'python': ['requests', 'msal'],
+        'python': ['requests'],
     },
 }
