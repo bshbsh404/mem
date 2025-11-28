@@ -56,7 +56,41 @@ class OutlookConfig(models.Model):
                 redirect_uri=self.redirect_uri
             )
             
-            return result.get('access_token') if result else None
+            if result and 'access_token' in result:
+                return {
+                    'access_token': result.get('access_token'),
+                    'refresh_token': result.get('refresh_token'),
+                    'expires_in': result.get('expires_in', 3600)
+                }
+            return None
         except Exception as e:
             _logger.error(f"Error getting access token: {e}")
+            return None
+    
+    def refresh_access_token(self, refresh_token):
+        """Refresh access token using refresh token"""
+        try:
+            authority = f"https://login.microsoftonline.com/{self.tenant_id}"
+            scopes = ["https://graph.microsoft.com/Calendars.ReadWrite"]
+            
+            app = msal.ConfidentialClientApplication(
+                self.client_id,
+                authority=authority,
+                client_credential=self.client_secret,
+            )
+            
+            result = app.acquire_token_by_refresh_token(
+                refresh_token,
+                scopes=scopes
+            )
+            
+            if result and 'access_token' in result:
+                return {
+                    'access_token': result.get('access_token'),
+                    'refresh_token': result.get('refresh_token'),
+                    'expires_in': result.get('expires_in', 3600)
+                }
+            return None
+        except Exception as e:
+            _logger.error(f"Error refreshing access token: {e}")
             return None

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 # Part of Odoo. See LICENSE file for full copyright and licensing details.
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 
 class HrEmployee(models.Model):
@@ -14,14 +15,14 @@ class HrEmployee(models.Model):
     outlook_calendar_id = fields.Char(string='Outlook Calendar ID', groups='base.group_system')
     
     def action_setup_outlook_sync(self):
-        """Open wizard to setup Outlook calendar sync for employee"""
+        """Setup Outlook calendar sync for employee"""
+        outlook_config = self.env['outlook.config'].search([('active', '=', True)], limit=1)
+        if not outlook_config:
+            raise UserError(_('No active Outlook configuration found. Please configure Outlook settings first.'))
+        
+        auth_url = outlook_config.get_auth_url()
         return {
-            'name': _('Setup Outlook Calendar Sync'),
-            'type': 'ir.actions.act_window',
-            'res_model': 'outlook.setup.wizard',
-            'view_mode': 'form',
+            'type': 'ir.actions.act_url',
+            'url': auth_url,
             'target': 'new',
-            'context': {
-                'default_employee_id': self.id,
-            }
         }

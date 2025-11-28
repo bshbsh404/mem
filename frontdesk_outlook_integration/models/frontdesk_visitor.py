@@ -104,7 +104,11 @@ class FrontdeskVisitor(models.Model):
     
     def _prepare_outlook_event_data(self):
         """Prepare event data for Outlook API"""
-        start_time = datetime.combine(self.planned_date, datetime.min.time()) + timedelta(hours=int(self.planned_time), minutes=(self.planned_time % 1) * 60)
+        if self.planned_time is not None:
+            start_time = datetime.combine(self.planned_date, datetime.min.time()) + timedelta(hours=int(self.planned_time), minutes=(self.planned_time % 1) * 60)
+        else:
+            start_time = datetime.combine(self.planned_date or self.date, datetime.min.time())
+        
         end_time = start_time + timedelta(minutes=self.planned_duration or 60)
         
         return {
@@ -141,19 +145,27 @@ class FrontdeskVisitor(models.Model):
     
     def _send_outlook_request(self, host, method, endpoint, data=None):
         """Send request to Microsoft Graph API"""
+        access_token = host.outlook_access_token
+        
+        if host.outlook_token_expiry and host.outlook_token_expiry <= datetime.now():
+            access_token = self._refresh_host_token(host)
+            if not access_token:
+                _logger.error('Failed to refresh access token')
+                return False
+        
         url = f'https://graph.microsoft.com/v1.0/me{endpoint}'
         headers = {
-            'Authorization': f'Bearer {host.outlook_access_token}',
+            'Authorization': f'Bearer {access_token}',
             'Content-Type': 'application/json'
         }
         
         try:
             if method == 'POST':
-                response = requests.post(url, headers=headers, json=data)
+                response = requests.post(url, headers=headers, json=data, timeout=30)
             elif method == 'PATCH':
-                response = requests.patch(url, headers=headers, json=data)
+                response = requests.patch(url, headers=headers, json=data, timeout=30)
             elif method == 'DELETE':
-                response = requests.delete(url, headers=headers)
+                response = requests.delete(url, headers=headers, timeout=30)
             else:
                 return False
                 
@@ -161,6 +173,11 @@ class FrontdeskVisitor(models.Model):
                 if method == 'POST':
                     return response.json().get('id')
                 return True
+            elif response.status_code == 401:
+                access_token = self._refresh_host_token(host)
+                if access_token:
+                    return self._send_outlook_request(host, method, endpoint, data)
+                return False
             else:
                 _logger.error(f'Outlook API error: {response.status_code} - {response.text}')
                 return False
@@ -168,6 +185,25 @@ class FrontdeskVisitor(models.Model):
         except Exception as e:
             _logger.error(f'Error sending Outlook request: {e}')
             return False
+    
+    def _refresh_host_token(self, host):
+        """Refresh host's Outlook access token"""
+        if not host.outlook_refresh_token:
+            return None
+            
+        outlook_config = self.env['outlook.config'].search([('active', '=', True)], limit=1)
+        if not outlook_config:
+            return None
+            
+        token_data = outlook_config.refresh_access_token(host.outlook_refresh_token)
+        if token_data:
+            host.write({
+                'outlook_access_token': token_data['access_token'],
+                'outlook_refresh_token': token_data.get('refresh_token', host.outlook_refresh_token),
+                'outlook_token_expiry': datetime.now() + timedelta(seconds=token_data['expires_in'])
+            })
+            return token_data['access_token']
+        return None
     
     @api.model
     def create(self, vals):

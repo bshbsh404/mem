@@ -13,9 +13,10 @@
     'depends': ['frontdesk'],
     'data': [
         'security/ir.model.access.csv',
+        'data/outlook_config_data.xml',
+        'views/outlook_config_views.xml',
         'views/frontdesk_visitor_views.xml',
         'views/hr_employee_views.xml',
-        'data/outlook_config_data.xml',
     ],
     'external_dependencies': {
         'python': ['requests', 'msal'],
