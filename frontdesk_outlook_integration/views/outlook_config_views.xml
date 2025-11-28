@@ -59,7 +59,7 @@
     <!-- Menu Item -->
     <menuitem id="outlook_config_menu"
               name="Outlook Configuration"
-              parent="hr.menu_hr_configuration"
+              parent="frontdesk.frontdesk_menu_root"
               action="outlook_config_action"
               sequence="100"
               groups="base.group_system"/>
