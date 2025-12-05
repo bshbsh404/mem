@@ -20,7 +20,7 @@ class HrEmployee(models.Model):
         if not outlook_config:
             raise UserError(_('No active Outlook configuration found. Please configure Outlook settings first.'))
         
-        auth_url = outlook_config.get_auth_url()
+        auth_url = outlook_config.get_auth_url(employee_id=self.id)
         return {
             'type': 'ir.actions.act_url',
             'url': auth_url,

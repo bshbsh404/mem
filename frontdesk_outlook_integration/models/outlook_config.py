@@ -21,7 +21,7 @@ class OutlookConfig(models.Model):
     redirect_uri = fields.Char(string='Redirect URI', default='http://localhost:8000/auth', help="Redirect URI configured in Azure")
     active = fields.Boolean(string='Active', default=True)
 
-    def get_auth_url(self):
+    def get_auth_url(self, employee_id=None):
         """Generate authorization URL for Microsoft OAuth"""
         params = {
             'client_id': self.client_id,
@@ -30,6 +30,9 @@ class OutlookConfig(models.Model):
             'scope': 'https://graph.microsoft.com/Calendars.ReadWrite offline_access',
             'response_mode': 'query',
         }
+        
+        if employee_id:
+            params['state'] = str(employee_id)
         
         auth_url = f"https://login.microsoftonline.com/{self.tenant_id}/oauth2/v2.0/authorize?{urls.url_encode(params)}"
         return auth_url
