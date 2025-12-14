@@ -9,8 +9,7 @@ _logger = logging.getLogger(__name__)
 class HrEmployee(models.Model):
     _inherit = 'hr.employee'
 
-    # Add employee_number field if it doesn't exist in the base frontdesk module
-    employee_number = fields.Char(string='Employee Number', help="Unique employee identifier")
+    employee_number = fields.Char(string='Employee Number', help="Unique employee identifier", related='barcode')
     
     def get_pending_approvals(self):
         """Get pending visitor approvals for this employee"""
