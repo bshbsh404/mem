@@ -25,29 +25,36 @@ class FrontdeskVisitor(models.Model):
     def create_outlook_event(self):
         """Create event in host employee's Outlook calendar"""
         for visitor in self:
-            if not visitor.host_ids:
+            _logger.info(f'create_outlook_event called for visitor {visitor.id} ({visitor.partner_id.name})')
+            if not visitor.employee_id:
+                _logger.info(f'Skipping Outlook sync for visitor {visitor.id}: No host employee assigned')
                 continue
                 
-            for host in visitor.host_ids:
-                if not host.outlook_calendar_sync or not host.outlook_access_token:
-                    continue
-                    
-                try:
-                    event_data = visitor._prepare_outlook_event_data()
-                    event_id = visitor._send_outlook_request(host, 'POST', '/events', event_data)
-                    
-                    if event_id:
-                        visitor.write({
-                            'outlook_event_id': event_id,
-                            'outlook_sync_status': 'synced'
-                        })
-                        _logger.info(f'Created Outlook event {event_id} for visitor {visitor.partner_id.name}')
-                    else:
-                        visitor.outlook_sync_status = 'sync_failed'
-                        
-                except Exception as e:
-                    _logger.error(f'Error creating Outlook event for visitor {visitor.partner_id.name}: {e}')
+            host = visitor.employee_id
+            _logger.info(f'Checking host {host.name} for visitor {visitor.id}')
+            if not host.outlook_calendar_sync:
+                _logger.info(f'Skipping host {host.name}: Outlook calendar sync not enabled')
+                continue
+            if not host.outlook_access_token:
+                _logger.info(f'Skipping host {host.name}: No Outlook access token')
+                continue
+                
+            try:
+                event_data = visitor._prepare_outlook_event_data()
+                event_id = visitor._send_outlook_request(host, 'POST', '/events', event_data)
+                
+                if event_id:
+                    visitor.write({
+                        'outlook_event_id': event_id,
+                        'outlook_sync_status': 'synced'
+                    })
+                    _logger.info(f'Created Outlook event {event_id} for visitor {visitor.partner_id.name}')
+                else:
                     visitor.outlook_sync_status = 'sync_failed'
+                    
+            except Exception as e:
+                _logger.error(f'Error creating Outlook event for visitor {visitor.partner_id.name}: {e}')
+                visitor.outlook_sync_status = 'sync_failed'
     
     def update_outlook_event(self):
         """Update existing Outlook event"""
@@ -55,24 +62,27 @@ class FrontdeskVisitor(models.Model):
             if not visitor.outlook_event_id:
                 continue
                 
-            for host in visitor.host_ids:
-                if not host.outlook_calendar_sync or not host.outlook_access_token:
-                    continue
-                    
-                try:
-                    event_data = visitor._prepare_outlook_event_data()
-                    success = visitor._send_outlook_request(
-                        host, 'PATCH', f'/events/{visitor.outlook_event_id}', event_data
-                    )
-                    
-                    if success:
-                        _logger.info(f'Updated Outlook event {visitor.outlook_event_id} for visitor {visitor.partner_id.name}')
-                    else:
-                        visitor.outlook_sync_status = 'sync_failed'
-                        
-                except Exception as e:
-                    _logger.error(f'Error updating Outlook event for visitor {visitor.partner_id.name}: {e}')
+            if not visitor.employee_id:
+                continue
+                
+            host = visitor.employee_id
+            if not host.outlook_calendar_sync or not host.outlook_access_token:
+                continue
+                
+            try:
+                event_data = visitor._prepare_outlook_event_data()
+                success = visitor._send_outlook_request(
+                    host, 'PATCH', f'/events/{visitor.outlook_event_id}', event_data
+                )
+                
+                if success:
+                    _logger.info(f'Updated Outlook event {visitor.outlook_event_id} for visitor {visitor.partner_id.name}')
+                else:
                     visitor.outlook_sync_status = 'sync_failed'
+                    
+            except Exception as e:
+                _logger.error(f'Error updating Outlook event for visitor {visitor.partner_id.name}: {e}')
+                visitor.outlook_sync_status = 'sync_failed'
     
     def cancel_outlook_event(self):
         """Cancel/delete Outlook event"""
@@ -80,27 +90,30 @@ class FrontdeskVisitor(models.Model):
             if not visitor.outlook_event_id:
                 continue
                 
-            for host in visitor.host_ids:
-                if not host.outlook_calendar_sync or not host.outlook_access_token:
-                    continue
-                    
-                try:
-                    success = visitor._send_outlook_request(
-                        host, 'DELETE', f'/events/{visitor.outlook_event_id}'
-                    )
-                    
-                    if success:
-                        visitor.write({
-                            'outlook_event_id': False,
-                            'outlook_sync_status': 'cancelled'
-                        })
-                        _logger.info(f'Cancelled Outlook event for visitor {visitor.partner_id.name}')
-                    else:
-                        visitor.outlook_sync_status = 'sync_failed'
-                        
-                except Exception as e:
-                    _logger.error(f'Error cancelling Outlook event for visitor {visitor.partner_id.name}: {e}')
+            if not visitor.employee_id:
+                continue
+                
+            host = visitor.employee_id
+            if not host.outlook_calendar_sync or not host.outlook_access_token:
+                continue
+                
+            try:
+                success = visitor._send_outlook_request(
+                    host, 'DELETE', f'/events/{visitor.outlook_event_id}'
+                )
+                
+                if success:
+                    visitor.write({
+                        'outlook_event_id': False,
+                        'outlook_sync_status': 'cancelled'
+                    })
+                    _logger.info(f'Cancelled Outlook event for visitor {visitor.partner_id.name}')
+                else:
                     visitor.outlook_sync_status = 'sync_failed'
+                    
+            except Exception as e:
+                _logger.error(f'Error cancelling Outlook event for visitor {visitor.partner_id.name}: {e}')
+                visitor.outlook_sync_status = 'sync_failed'
     
     def _prepare_outlook_event_data(self):
         """Prepare event data for Outlook API"""
