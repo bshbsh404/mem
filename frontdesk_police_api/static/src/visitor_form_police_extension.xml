@@ -1,90 +1,281 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <templates xml:space="preserve">
-    <!-- امتداد لنموذج الزائر لإضافة نوع "البحث في قاعدة بيانات الشرطة" -->
-    <t t-name="frontdesk.VisitorForm" t-inherit="frontdesk.VisitorForm" t-inherit-mode="extension">
-        
-        <!-- إضافة نوع زائر جديد -->
-        <xpath expr="//div[@class='form-check' and .//input[@value='employee']]" position="after">
-            <div class="form-check">
-                <label class="form-check-label" for="visitorTypePolice">Police Database Lookup</label>
-                <input type="radio" id="visitorTypePolice" name="visitorType" value="police_id" 
-                       class="form-check-input" t-on-change="_onVisitorTypeChange" 
-                       t-att-checked="state.visitorType === 'police_id'"/>
-            </div>
-        </xpath>
+    <!-- نموذج منفصل للبحث في قاعدة بيانات الشرطة العمانية -->
+    <t t-name="frontdesk.PoliceVisitorForm">
+        <div class="d-flex flex-column justify-content-center">
+            <form class="row d-flex justify-content-center align-items-start" t-on-submit.prevent="_onSubmit">
+                <div t-att-class="props.isPlannedVisitors ? 'col-xl-9' : 'col-lg-6'">
+                    
+                    <!-- عنوان النموذج -->
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary">
+                            <i class="fa fa-search"></i> 
+                            Police Database Visitor Registration
+                        </h3>
+                        <p class="text-muted">Register visitor using Oman Police Database</p>
+                        
 
-        <!-- إضافة قسم البحث في قاعدة بيانات الشرطة -->
-        <xpath expr="//div[contains(@class, 'mt-3') and .//input[@id='visitor_id']]" position="after">
-            <div t-if="state.visitorType === 'police_id'" class="mt-3 col-12">
-                <div class="row">
-                    <div class="col-6">
-                        <label for="police_civil_id" class="form-label">
-                            Civil ID for ROP Lookup 
-                            <span class="small text-danger">*</span>
-                        </label>
-                        <input type="text" 
-                               minlength="8" 
-                               maxlength="12" 
-                               pattern="[0-9]{8,12}" 
-                               autocomplete="off" 
-                               class="form-control" 
-                               t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
-                               id="police_civil_id" 
-                               t-ref="inputVisitorID" 
-                               placeholder="Enter Civil ID (8-12 digits)" 
-                               required="required"/>
                     </div>
-                    <div class="col-4">
-                        <label for="card_expiry_date" class="form-label">
-                            Card Expiry Date
-                            <span class="small text-danger">*</span>
-                        </label>
-                        <input type="date" 
-                               autocomplete="off" 
-                               class="form-control" 
-                               t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
-                               id="card_expiry_date" 
-                               t-ref="inputCardExpiry" 
-                               required="required"/>
+
+                    <!-- قسم البحث في قاعدة بيانات الشرطة -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-id-card"></i> Police Database Lookup
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-6">
+                                    <label for="police_civil_id" class="form-label">
+                                        Civil ID <span class="small text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           minlength="8" 
+                                           maxlength="12" 
+                                           pattern="[0-9]{8,12}" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="police_civil_id" 
+                                           t-ref="inputVisitorID" 
+                                           placeholder="Enter Civil ID (8-12 digits)" 
+                                           required="required"/>
+                                </div>
+                                <div class="col-4">
+                                    <label for="card_expiry_date" class="form-label">
+                                        Card Expiry Date <span class="small text-danger">*</span>
+                                    </label>
+                                    <input type="date" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="card_expiry_date" 
+                                           t-ref="inputCardExpiry" 
+                                           required="required"/>
+                                </div>
+                                <div class="col-2 d-flex align-items-end">
+                                    <button type="button" 
+                                            class="btn btn-primary w-100" 
+                                            t-on-click="_onPoliceIdLookup"
+                                            t-att-disabled="state.isPoliceApiLoading">
+                                        <span t-if="!state.isPoliceApiLoading">
+                                            <i class="fa fa-search"></i> Lookup
+                                        </span>
+                                        <span t-if="state.isPoliceApiLoading">
+                                            <i class="fa fa-spinner fa-spin"></i> Searching...
+                                        </span>
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- رسائل الخطأ أو النجاح -->
+                            <div t-if="state.policeApiError" class="alert alert-danger mt-3">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <span t-esc="state.policeApiError"/>
+                            </div>
+                            
+                            <div t-if="state.policeDataFound" class="alert alert-success mt-3">
+                                <i class="fa fa-check-circle"></i>
+                                Visitor data found and loaded from police database!
+                                <br/>
+                                <small>Name: <span t-esc="state.visitorName || 'N/A'"/> | Phone: <span t-esc="state.visitorPhone || 'N/A'"/></small>
+                            </div>
+                            
+                            <!-- عرض البيانات المسترجعة -->
+                            <div t-if="state.policeDataFound" class="mt-3">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fa fa-info-circle"></i> Retrieved Data from Police Database
+                                        </h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <h6 class="text-primary">Arabic Names:</h6>
+                                                <p><strong>First Name:</strong> <span t-esc="state.visitorName || 'N/A'"/></p>
+                                                <p><strong>Second Name:</strong> <span t-esc="state.visitorSecondName || 'N/A'"/></p>
+                                                <p><strong>Third Name:</strong> <span t-esc="state.visitorThirdName || 'N/A'"/></p>
+                                                <p><strong>Family Name:</strong> <span t-esc="state.visitorFourthName || 'N/A'"/></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6 class="text-primary">English Names:</h6>
+                                                <p><strong>First Name:</strong> <span t-esc="state.visitorNameEn || 'N/A'"/></p>
+                                                <p><strong>Second Name:</strong> <span t-esc="state.visitorSecondNameEn || 'N/A'"/></p>
+                                                <p><strong>Third Name:</strong> <span t-esc="state.visitorThirdNameEn || 'N/A'"/></p>
+                                                <p><strong>Family Name:</strong> <span t-esc="state.visitorFourthNameEn || 'N/A'"/></p>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <h6 class="text-primary">Other Information:</h6>
+                                                <p><strong>Phone:</strong> <span t-esc="state.visitorPhone || 'N/A'"/></p>
+                                                <p><strong>Civil ID:</strong> <span t-esc="state.visitorID || 'N/A'"/></p>
+                                                <p><strong>Birth Date:</strong> <span t-esc="state.visitorBirthDate || 'N/A'"/></p>
+                                                <p><strong>Email:</strong> <span t-esc="state.visitorEmail || 'N/A'"/></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- معلومات إرشادية -->
+                            <div class="alert alert-info mt-3">
+                                <i class="fa fa-info-circle"></i>
+                                <strong>Instructions:</strong> Enter the visitor's Civil ID number and card expiry date, then click "Lookup" to automatically retrieve their information from the Oman Police database.
+                            </div>
+                        </div>
                     </div>
-                    <div class="col-2 d-flex align-items-end">
+
+                    <!-- معلومات الزائر -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fa fa-user"></i> Visitor Information
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div t-if="props.stationInfo and props.stationInfo.ask_first_name !== 'none'" class="col-6 mb-3">
+                                    <label for="name" class="form-label">
+                                        First Name 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_first_name != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="text" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="name" 
+                                           t-ref="inputName" 
+                                           placeholder="First Name" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_first_name === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_second_name != 'none'" class="col-6 mb-3">
+                                    <label for="second_name" class="form-label">
+                                        Second Name 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_second_name != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="text" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="second_name" 
+                                           t-ref="inputSecondName" 
+                                           placeholder="Second Name" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_second_name === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_third_name != 'none'" class="col-6 mb-3">
+                                    <label for="third_name" class="form-label">
+                                        Third Name 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_third_name != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="text" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="third_name" 
+                                           t-ref="inputThirdName" 
+                                           placeholder="Third Name" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_third_name === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_fourth_name != 'none'" class="col-6 mb-3">
+                                    <label for="fourth_name" class="form-label">
+                                        Family Name 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_fourth_name != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="text" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="fourth_name" 
+                                           t-ref="inputFourthName" 
+                                           placeholder="Family Name" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_fourth_name === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_email !== 'none'" class="col-6 mb-3">
+                                    <label for="email" class="form-label">
+                                        Email 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_email != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="email" 
+                                           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="email" 
+                                           t-ref="inputEmail" 
+                                           placeholder="email@example.com" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_email === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_phone !== 'none'" class="col-6 mb-3">
+                                    <label for="phone" class="form-label">
+                                        Phone Number 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_phone != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="phone" 
+                                           minlength="8" 
+                                           maxlength="8" 
+                                           pattern=".{8,8}" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="phone" 
+                                           t-ref="inputPhone" 
+                                           placeholder="Phone Number" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_phone === 'required'"/>
+                                </div>
+                                <div t-if="props.stationInfo and props.stationInfo.ask_landline !== 'none'" class="col-6 mb-3">
+                                    <label for="landline" class="form-label">
+                                        Landline Number 
+                                        <t t-if="props.stationInfo and props.stationInfo.ask_landline != 'optional'">
+                                            <span class="small text-danger">*</span>
+                                        </t>
+                                    </label>
+                                    <input type="phone" 
+                                           autocomplete="off" 
+                                           class="form-control" 
+                                           t-att-class="props.theme === 'light' ? '' : 'bg-700 border-0 text-white'" 
+                                           id="landline" 
+                                           t-ref="inputLandline" 
+                                           placeholder="Landline Number" 
+                                           t-att-required="props.stationInfo and props.stationInfo.ask_landline === 'required'"/>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- رسالة خطأ الهاتف -->
+                    <div t-if="state.showPhoneError" class="alert alert-warning">
+                        <i class="fa fa-exclamation-triangle"></i>
+                        Please enter the phone number with the country code.
+                    </div>
+                    
+                    <!-- أزرار الإجراءات -->
+                    <div class="d-flex justify-content-between">
                         <button type="button" 
-                                class="btn btn-primary w-100" 
-                                t-on-click="_onPoliceIdLookup"
-                                t-att-disabled="state.isPoliceApiLoading">
-                            <span t-if="!state.isPoliceApiLoading">🔍 Lookup</span>
-                            <span t-if="state.isPoliceApiLoading">
-                                <i class="fa fa-spinner fa-spin"></i> Searching...
-                            </span>
+                                class="btn btn-secondary" 
+                                t-on-click="() => this.props.showScreen('VisitorForm')">
+                            <i class="fa fa-arrow-left"></i> Back to Regular Form
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-success btn-lg">
+                            <i class="fa fa-user-plus"></i> Register Visitor
                         </button>
                     </div>
                 </div>
-                
-                <!-- رسائل الخطأ أو النجاح -->
-                <div t-if="state.policeApiError" class="alert alert-danger mt-2">
-                    <i class="fa fa-exclamation-triangle"></i>
-                    <span t-esc="state.policeApiError"/>
-                </div>
-                
-                <!-- مؤشر التحميل -->
-                <div t-if="state.isPoliceApiLoading" class="text-center mt-2">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Searching police database...</p>
-                </div>
-            </div>
-        </xpath>
-
-        <!-- إضافة مساعدة للمستخدم -->
-        <xpath expr="//div[contains(@class, 'mt-3') and .//label[contains(text(), 'Identification Type')]]" position="before">
-            <div t-if="state.visitorType === 'police_id'" class="alert alert-info mt-3">
-                <i class="fa fa-info-circle"></i>
-                <strong>Police Database Lookup:</strong> 
-                Enter the visitor's Civil ID and click "Lookup" to automatically fill their information from the police database.
-            </div>
-        </xpath>
-
+            </form>
+        </div>
     </t>
 </templates>

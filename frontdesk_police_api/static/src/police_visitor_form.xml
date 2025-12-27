@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<templates xml:space="preserve">
+    <t t-name="frontdesk.PoliceVisitorForm">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8">
+                    
+                    <!-- عنوان النموذج -->
+                    <div class="text-center mb-4">
+                        <h3 class="text-primary">
+                            <i class="fa fa-shield"></i> 
+                            Police Database Visitor Registration
+                        </h3>
+                        <p class="text-muted">Register visitor using Oman Police Database</p>
+                    </div>
+
+                    <!-- قسم البحث في قاعدة بيانات الشرطة -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">
+                                <i class="fa fa-search"></i> Police Database Lookup
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="police_civil_id" class="form-label">
+                                        Civil ID <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="police_civil_id" 
+                                           t-ref="inputPoliceCivilID" 
+                                           placeholder="Enter Civil ID" 
+                                           required="required"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="card_expiry_date" class="form-label">
+                                        Card Expiry Date <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="date" 
+                                           class="form-control" 
+                                           id="card_expiry_date" 
+                                           t-ref="inputCardExpiry" 
+                                           required="required"/>
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="button" 
+                                            class="btn btn-primary w-100" 
+                                            t-on-click="_onPoliceIdLookup">
+                                        <i class="fa fa-search"></i> Lookup
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- رسائل الحالة -->
+                            <div t-if="state.policeApiError" class="alert alert-danger mt-3">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <span t-esc="state.policeApiError"/>
+                            </div>
+                            
+                            <div t-if="state.policeDataFound" class="alert alert-success mt-3">
+                                <i class="fa fa-check-circle"></i>
+                                Data successfully retrieved from police database!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- الحقول الأساسية -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Visitor Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <!-- الاسم الأول -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">First Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="name" t-ref="inputName" placeholder="Enter first name" required="required" t-model="state.visitorName"/>
+                                </div>
+                                <!-- اسم العائلة -->
+                                <div class="col-md-6 mb-3">
+                                    <label for="fourth_name" class="form-label">Family Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" id="fourth_name" t-ref="inputFourthName" placeholder="Enter family name" required="required" t-model="state.visitorFourthName"/>
+                                </div>
+                            </div>
+
+                            <!-- البريد الإلكتروني -->
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" t-ref="inputEmail" placeholder="Enter email address" required="required" t-model="state.visitorEmail"/>
+                            </div>
+
+                            <!-- رقم التلفون -->
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number <span class="text-danger">*</span></label>
+                                <input type="tel" class="form-control" id="phone" t-ref="inputPhone" placeholder="Enter phone number" required="required" t-model="state.visitorPhone"/>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- أزرار الإجراءات -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <button type="button" 
+                                class="btn btn-secondary" 
+                                t-on-click="() => this.props.showScreen('VisitorForm')">
+                            <i class="fa fa-arrow-left"></i> Back to Regular Form
+                        </button>
+                        <button type="submit" 
+                                class="btn btn-primary"
+                                t-on-click="_onSubmit">
+                            <i class="fa fa-user-plus"></i> Register Visitor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

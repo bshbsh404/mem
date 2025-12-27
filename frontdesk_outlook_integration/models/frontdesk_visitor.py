@@ -192,7 +192,11 @@ class FrontdeskVisitor(models.Model):
                     return self._send_outlook_request(host, method, endpoint, data)
                 return False
             else:
-                _logger.error(f'Outlook API error: {response.status_code} - {response.text}')
+                error_msg = response.text
+                if response.status_code == 404 and 'MailboxNotEnabledForRESTAPI' in error_msg:
+                    _logger.error(f'Outlook mailbox not enabled for {host.name}: Mailbox is inactive, soft-deleted, or hosted on-premise (Exchange Server). Microsoft Graph API only works with Microsoft 365 cloud mailboxes.')
+                else:
+                    _logger.error(f'Outlook API error: {response.status_code} - {error_msg}')
                 return False
                 
         except Exception as e:

@@ -1,0 +1,253 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- COSEC Configuration Form View -->
+        <record id="view_frontdesk_cosec_config_form" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.config.form</field>
+            <field name="model">frontdesk.cosec.config</field>
+            <field name="arch" type="xml">
+                <form string="COSEC Configuration">
+                    <header>
+                        <button name="test_connection" type="object" string="Test Connection" class="btn-primary"/>
+                        <button name="test_detailed_connection" type="object" string="Detailed Test" class="btn-info"/>
+                        <button name="action_auto_retry_failed_logs" type="object" string="Auto Retry Failed Logs" class="btn-warning"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Basic Information">
+                                <field name="name"/>
+                                <field name="active"/>
+                                <field name="enable_cosec_integration"/>
+                            </group>
+                            <group string="API Configuration">
+                                <field name="api_url"/>
+                                <field name="username"/>
+                                <field name="password" password="True"/>
+                                <field name="emp_id_prefix"/>
+                            </group>
+                        </group>
+                        <group string="Station Configuration">
+                            <field name="station_ids" widget="many2many_tags"/>
+                        </group>
+                        <group string="Logging">
+                            <field name="enable_logging"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- COSEC Configuration Tree View -->
+        <record id="view_frontdesk_cosec_config_tree" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.config.tree</field>
+            <field name="model">frontdesk.cosec.config</field>
+            <field name="arch" type="xml">
+                <tree string="COSEC Configurations">
+                    <field name="name"/>
+                    <field name="api_url"/>
+                    <field name="username"/>
+                    <field name="enable_cosec_integration"/>
+                    <field name="active"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- COSEC Log Form View -->
+        <record id="view_frontdesk_cosec_log_form" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.log.form</field>
+            <field name="model">frontdesk.cosec.log</field>
+            <field name="arch" type="xml">
+                <form string="COSEC Log">
+                    <header>
+                        <button name="action_retry" type="object" string="Retry" class="btn-primary" 
+                                invisible="state == 'success'"/>
+                        <field name="state" widget="statusbar"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Visitor Information">
+                                <field name="visitor_id"/>
+                                <field name="emp_id"/>
+                                <field name="qr_string"/>
+                            </group>
+                            <group string="API Details">
+                                <field name="api_url"/>
+                                <field name="response_status"/>
+                                <field name="create_date"/>
+                                <field name="sent_date"/>
+                            </group>
+                        </group>
+                        <group string="Request/Response Data">
+                            <field name="request_data"/>
+                            <field name="response_data"/>
+                            <field name="error_message" invisible="not error_message"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- COSEC Log Tree View -->
+        <record id="view_frontdesk_cosec_log_tree" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.log.tree</field>
+            <field name="model">frontdesk.cosec.log</field>
+            <field name="arch" type="xml">
+                <tree string="COSEC Logs" decoration-success="state == 'success'" decoration-danger="state == 'failed'">
+                    <field name="visitor_id"/>
+                    <field name="emp_id"/>
+                    <field name="qr_string"/>
+                    <field name="state"/>
+                    <field name="response_status"/>
+                    <field name="create_date"/>
+                    <field name="sent_date"/>
+                    <button name="action_retry" type="object" string="Retry" 
+                            class="btn-primary" 
+                            invisible="state == 'success'"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Extend Frontdesk Visitor Form to add COSEC fields -->
+        <record id="view_frontdesk_visitor_form_inherit_cosec" model="ir.ui.view">
+            <field name="name">frontdesk.visitor.form.inherit.cosec</field>
+            <field name="model">frontdesk.visitor</field>
+            <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <group string="COSEC Integration" invisible="not cosec_sent">
+                        <group>
+                            <field name="cosec_sent"/>
+                            <field name="cosec_last_sent"/>
+                        </group>
+                        <group>
+                            <button name="action_send_to_cosec" type="object" string="Send to COSEC" 
+                                    class="btn-primary" invisible="cosec_sent"/>
+                            <button name="action_view_cosec_logs" type="object" string="View COSEC Logs" 
+                                    class="btn-info"/>
+                        </group>
+                    </group>
+                    <field name="cosec_log_ids" readonly="1">
+                        <tree>
+                            <field name="emp_id"/>
+                            <field name="qr_string"/>
+                            <field name="state"/>
+                            <field name="response_status"/>
+                            <field name="create_date"/>
+                            <field name="sent_date"/>
+                        </tree>
+                    </field>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Extend Frontdesk Visitor Tree to add COSEC column -->
+        <record id="view_frontdesk_visitor_tree_inherit_cosec" model="ir.ui.view">
+            <field name="name">frontdesk.visitor.tree.inherit.cosec</field>
+            <field name="model">frontdesk.visitor</field>
+            <field name="inherit_id" ref="frontdesk.frontdesk_visitor_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='state']" position="after">
+                    <field name="cosec_sent" optional="show"/>
+                </xpath>
+                <xpath expr="//header" position="inside">
+                    <button name="action_view_cosec_config" type="object" string="COSEC Config" 
+                            class="btn-info" groups="frontdesk.frontdesk_group_administrator"/>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- Actions -->
+        <record id="action_frontdesk_cosec_config" model="ir.actions.act_window">
+            <field name="name">COSEC Configuration</field>
+            <field name="res_model">frontdesk.cosec.config</field>
+            <field name="view_mode">tree,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first COSEC configuration!
+                </p>
+            </field>
+        </record>
+
+        <!-- COSEC Log Search View -->
+        <record id="view_frontdesk_cosec_log_search" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.log.search</field>
+            <field name="model">frontdesk.cosec.log</field>
+            <field name="arch" type="xml">
+                <search string="Search COSEC Logs">
+                    <field name="visitor_id"/>
+                    <field name="emp_id"/>
+                    <field name="qr_string"/>
+                    <filter string="Pending" name="pending" domain="[('state', '=', 'pending')]"/>
+                    <filter string="Success" name="success" domain="[('state', '=', 'success')]"/>
+                    <filter string="Failed" name="failed" domain="[('state', '=', 'failed')]"/>
+                    <filter string="Error" name="error" domain="[('state', '=', 'error')]"/>
+                    <filter string="Failed &amp; Error" name="failed_error" domain="[('state', 'in', ['failed', 'error'])]"/>
+                    <separator/>
+                    <filter string="Today" name="today" domain="[('create_date', '>=', context_today().strftime('%Y-%m-%d 00:00:00'))]"/>
+                    <filter string="This Week" name="this_week" domain="[('create_date', '>=', (context_today() - relativedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Status" name="group_state" context="{'group_by': 'state'}"/>
+                        <filter string="Visitor" name="group_visitor" context="{'group_by': 'visitor_id'}"/>
+                        <filter string="Date" name="group_date" context="{'group_by': 'create_date:day'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_frontdesk_cosec_log" model="ir.actions.act_window">
+            <field name="name">COSEC Logs</field>
+            <field name="res_model">frontdesk.cosec.log</field>
+            <field name="view_mode">tree,form</field>
+            <field name="context">{'search_default_failed_error': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No COSEC logs found!
+                </p>
+            </field>
+        </record>
+
+        <!-- COSEC Log Tree View with Retry Button -->
+        <record id="view_frontdesk_cosec_log_tree_with_retry" model="ir.ui.view">
+            <field name="name">frontdesk.cosec.log.tree.with.retry</field>
+            <field name="model">frontdesk.cosec.log</field>
+            <field name="arch" type="xml">
+                <tree string="COSEC Logs" decoration-success="state == 'success'" decoration-danger="state == 'failed'">
+                    <header>
+                        <button name="action_retry_multiple" type="object" string="Retry All Failed" 
+                                class="btn-primary" 
+                                invisible="state != 'failed'"/>
+                    </header>
+                    <field name="visitor_id"/>
+                    <field name="emp_id"/>
+                    <field name="qr_string"/>
+                    <field name="state"/>
+                    <field name="response_status"/>
+                    <field name="create_date"/>
+                    <field name="sent_date"/>
+                    <button name="action_retry" type="object" string="Retry" 
+                            class="btn-primary" 
+                            invisible="state == 'success'"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Menu Items -->
+        <menuitem id="menu_frontdesk_cosec_root" 
+                  name="COSEC Integration" 
+                  parent="frontdesk.frontdesk_menu_root" 
+                  sequence="50"/>
+
+        <menuitem id="menu_frontdesk_cosec_config" 
+                  name="Configuration" 
+                  parent="menu_frontdesk_cosec_root" 
+                  action="action_frontdesk_cosec_config" 
+                  sequence="10"/>
+
+        <menuitem id="menu_frontdesk_cosec_log" 
+                  name="Logs" 
+                  parent="menu_frontdesk_cosec_root" 
+                  action="action_frontdesk_cosec_log" 
+                  sequence="20"/>
+
+    </data>
+</odoo>

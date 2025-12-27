@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- إضافة قسم API الشرطة إلى النموذج الأساسي -->
+    <t t-name="frontdesk.VisitorForm" t-inherit="frontdesk.VisitorForm" t-inherit-mode="extension">
+        <xpath expr="//div[@class='mt-3 col-12']" position="before">
+            <!-- قسم البحث في قاعدة بيانات الشرطة - يظهر للزوار الأفراد والمؤسسات -->
+            <!-- Debug: Current visitorType = <t t-esc="state.visitorType"/> -->
+            <div class="mt-3 col-12 police-search-section" t-if="state.visitorType === 'individual' or state.visitorType === 'company'" t-key="state.visitorType">
+                <div class="card border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <h6 class="mb-0">
+                            <i class="fa fa-search"></i>
+                            <t t-if="props.currentLang == 'ar_001'"> بحث بالرقم المدني</t>
+                            <t t-else=""> Search by Civil ID</t>
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="police_civil_id" class="form-label">
+                                    <t t-if="props.currentLang == 'ar_001'">رقم البطاقة المدنية</t>
+                                    <t t-else="">Civil ID</t>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="text" 
+                                       class="form-control" 
+                                       id="police_civil_id" 
+                                       t-ref="inputPoliceCivilID"
+                                       t-att-placeholder="props.currentLang == 'ar_001' ? 'أدخل رقم البطاقة المدنية' : 'Enter Civil ID'"
+                                       maxlength="9"
+                                       minlength="4"/>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="card_expiry" class="form-label">
+                                    <t t-if="props.currentLang == 'ar_001'">تاريخ انتهاء البطاقة</t>
+                                    <t t-else="">Card Expiry Date</t>
+                                    <span class="text-danger">*</span>
+                                </label>
+                                <input type="date" 
+                                       class="form-control" 
+                                       id="card_expiry" 
+                                       t-ref="inputCardExpiry"/>
+                            </div>
+                        </div>
+                        
+                        <!-- زر البحث -->
+                        <div class="mt-3 text-center">
+                            <button type="button" 
+                                    class="btn btn-primary" 
+                                    t-on-click="_onPoliceIdLookup"
+                                    t-att-disabled="state.isPoliceApiLoading">
+                                <t t-if="state.isPoliceApiLoading">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <t t-if="props.currentLang == 'ar_001'">جاري البحث...</t>
+                                    <t t-else="">Searching...</t>
+                                </t>
+                                <t t-else="">
+                                    <i class="fa fa-search"></i>
+                                    <t t-if="props.currentLang == 'ar_001'">بحث بالرقم المدني</t>
+                                    <t t-else="">Search by Civil ID</t>
+                                </t>
+                            </button>
+                        </div>
+                        
+                        <!-- رسائل الخطأ والنجاح -->
+                        <div t-if="state.policeApiError" class="mt-3">
+                            <div class="alert alert-danger">
+                                <i class="fa fa-exclamation-triangle"></i>
+                                <span t-esc="state.policeApiError"/>
+                            </div>
+                        </div>
+                        
+                        <div t-if="state.policeDataFound" class="mt-3">
+                            <div class="alert alert-success">
+                                <i class="fa fa-check-circle"></i>
+                                <t t-if="props.currentLang == 'ar_001'">تم العثور على البيانات بنجاح! تم ملء النموذج تلقائياً.</t>
+                                <t t-else="">Data found successfully! Form filled automatically.</t>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </t>
+</templates>
+
+
+
