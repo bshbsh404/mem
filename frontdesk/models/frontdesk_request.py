@@ -506,7 +506,7 @@ class VisitRequest(models.Model):
         if values and values.get('name'):
             if values.get('passport') and values.get('visitor_id_number') and values.get('email'):
                 existing_visitor = self.env['res.partner'].sudo().search([
-                    '|', '|'
+                    '|', '|',
                     ('passport_id', '=', values.get('passport').strip()),
                     ('national_id', '=', str(values.get('visitor_id_number')).strip()),
                     ('email', '=', values.get('email').strip()),
@@ -589,7 +589,7 @@ class VisitRequest(models.Model):
                 values['location_description'] = employee.location_description
 
         if values.get('is_online') and values.get('is_online') == True:
-            # Handling online requests automatic assignment
+            # TODO: check Handling online requests automatic assignment
             _logger.info('Handling online requests automatic assignment')
             if values.get('visit_type') and values.get('visit_type') == 'employee':
                 _logger.info('Creating online visit request for employee')
@@ -740,8 +740,9 @@ class VisitRequest(models.Model):
 
         _logger.info('Creating visit request with values model')
         _logger.info(values)
-
-        return super(VisitRequest, self).create(values)
+        visit_request = super(VisitRequest, self).create(values)
+        visit_request._notify_host_by_email()
+        return visit_request
     
 
 class FrontdeskRequestOperatingUnitChangeReason(models.Model):
