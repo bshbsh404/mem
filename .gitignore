@@ -16,3 +16,17 @@ tests/test_api_endpoints.py
 tests/test_visitor_api_comprehensive.py
 frontdesk_push_notifications/models/__pycache__/push_notification_config.cpython-313.pyc
 frontdesk_visitor_api/controllers/__pycache__/visitor_api.cpython-313.pyc
+web_favicon/models/__pycache__/res_company.cpython-313.pyc
+*/*/__pycache__/*
+*/*/*/*.pyc
+*/*/*.pyc
+*/*.pyc
+*.pyc
+*.DS_Store
+web_favicon/models/__pycache__/res_company.cpython-313.pyc
+web_favicon/models/__pycache__/res_company.cpython-313.pyc
+web_favicon/models/__pycache__/res_company.cpython-313.pyc
+web_favicon/models/__pycache__/__init__.cpython-313.pyc
+web_favicon/models/__pycache__/__init__.cpython-313.pyc
+vista_backend_theme/.DS_Store
+*/.DS_Store
