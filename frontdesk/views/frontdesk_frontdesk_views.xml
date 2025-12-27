@@ -244,7 +244,7 @@
                             type="object">Visitors</a>
                         <a role="menuitem" class="dropdown-item" name="%(action_frontdesk_station_report)d"
                             type="action">Statistics</a>
-                        <a role="menuitem" type="edit" class="dropdown-item" groups="frontdesk.group_frontdesk_configuration">Configuration</a>
+                        <a role="menuitem" type="edit" class="dropdown-item" groups="frontdesk.frontdesk_group_administrator">Configuration</a>
                         <ul class="oe_kanban_colorpicker" data-field="color"/>
                     </t>
                     <t t-name="kanban-box">
