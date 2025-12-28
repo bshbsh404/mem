@@ -894,6 +894,11 @@ class Frontdesk(http.Controller):
             group_reference = f"GRP-{visit_date.replace('-', '')}-{dt.now().strftime('%H%M%S')}-{len(visitors)}"
             
             created_requests = []
+            station = False
+            try:
+                station = request.env['frontdesk.frontdesk'].sudo().browse(station_id)
+            except Exception as e:
+                _logger.error(f"Error getting station: {str(e)}")
             
             # Process each visitor
             for visitor_data in visitors:
@@ -934,6 +939,8 @@ class Frontdesk(http.Controller):
                     'source': 'online',
                     'state': 'draft',
                     'company_id': company.id,
+                    'is_online': station.is_online if station else False,
+                    'visit_type': 'employee',
                 }
                 
                 # Add host employee if found
